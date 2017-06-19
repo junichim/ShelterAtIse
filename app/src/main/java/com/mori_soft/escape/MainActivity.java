@@ -3,6 +3,7 @@ package com.mori_soft.escape;
 import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
@@ -16,15 +17,26 @@ import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.CommonStatusCodes;
+import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
+import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+
+import static com.google.android.gms.location.LocationServices.getSettingsClient;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final int PERMISSION_REQUEST_CODE = 1;
     private static final int GOOGLEPLAYSERVICE_ERROR_DIALOG_CODE = 1;
+    private static final int REQUST_CHECK_SETTING = 2;
 
     private FusedLocationProviderClient mFusedLocationClient;
 
@@ -66,6 +78,13 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
             case GOOGLEPLAYSERVICE_ERROR_DIALOG_CODE:
+                if (resultCode == RESULT_OK) {
+                    startLocation();
+                } else {
+                    finish();
+                }
+                break;
+            case REQUST_CHECK_SETTING:
                 if (resultCode == RESULT_OK) {
                     startLocation();
                 } else {
@@ -126,12 +145,55 @@ public class MainActivity extends AppCompatActivity {
         mFusedLocationClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
             @Override
             public void onSuccess(Location location) {
-                if (location != null)
+                if (location != null) {
                     Log.d(TAG, "lat, lon: " + location.getLatitude() + ", " + location.getLongitude());
-                else
+                } else {
                     Log.d(TAG, "location is null");
+                }
+                // 設定の確認
+                checkCurrentSettings();
             }
         });
     }
 
+    private void checkCurrentSettings() {
+
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder().addLocationRequest(getLocationRequest());
+
+
+        SettingsClient sc = LocationServices.getSettingsClient(this);
+        sc.checkLocationSettings(builder.build()).addOnFailureListener(this, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                final int statusCode = ((ApiException)e).getStatusCode();
+
+                switch (statusCode) {
+                    case CommonStatusCodes.RESOLUTION_REQUIRED:
+                        try {
+                            ResolvableApiException resolvable = (ResolvableApiException) e;
+                            resolvable.startResolutionForResult(MainActivity.this, REQUST_CHECK_SETTING);
+                        } catch (IntentSender.SendIntentException excpt) {
+                            Log.e(TAG, "exception occured: ", excpt);
+                        }
+                        break;
+                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                        Log.w(TAG, "status is: settings change inavailable");
+                        break;
+                    default:
+                        Log.w(TAG, "status is: " + statusCode);
+                        break;
+                }
+            }
+        });
+
+    }
+
+    private LocationRequest getLocationRequest() {
+        LocationRequest req = new LocationRequest();
+        req.setInterval(10000);
+        req.setFastestInterval(5000);
+        req.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        return req;
+    }
 }
