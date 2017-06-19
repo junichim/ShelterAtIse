@@ -12,6 +12,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -21,13 +22,19 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
 import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+
+import java.util.Date;
+import java.util.Locale;
 
 import static com.google.android.gms.location.LocationServices.getSettingsClient;
 
@@ -74,6 +81,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        mFusedLocationClient.removeLocationUpdates(mLocationCallback);
+    }
+
+    @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         switch (requestCode) {
@@ -86,7 +99,8 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case REQUST_CHECK_SETTING:
                 if (resultCode == RESULT_OK) {
-                    startLocation();
+                    // 継続的な位置情報の更新
+                    startLocationUpdate();
                 } else {
                     finish();
                 }
@@ -184,6 +198,11 @@ public class MainActivity extends AppCompatActivity {
                         break;
                 }
             }
+        }).addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>() {
+            @Override
+            public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
+                startLocationUpdate();
+            }
         });
 
     }
@@ -196,4 +215,21 @@ public class MainActivity extends AppCompatActivity {
 
         return req;
     }
+
+    @SuppressWarnings("MissingPermission")
+    private void startLocationUpdate() {
+        mFusedLocationClient.requestLocationUpdates(getLocationRequest(), mLocationCallback, null);
+        Log.d(TAG, "mLocationCallback: " + mLocationCallback.toString());
+    }
+
+    private LocationCallback mLocationCallback = new LocationCallback(){
+        @Override
+        public void onLocationResult(LocationResult locationResult) {
+            super.onLocationResult(locationResult);
+
+            Location loc = locationResult.getLastLocation();
+            Log.d(TAG, "location: " + DateFormat.format("yyyy/MM/dd kk:mm:ss", new Date(loc.getTime())) + ", lat lon : " + loc.getLatitude() + ", " + loc.getLongitude());
+        }
+    };
+
 }
