@@ -6,10 +6,11 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.format.DateFormat;
@@ -32,9 +33,10 @@ import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.graphhopper.GraphHopper;
 
+import java.io.File;
 import java.util.Date;
-import java.util.Locale;
 
 import static com.google.android.gms.location.LocationServices.getSettingsClient;
 
@@ -46,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
     private static final int REQUST_CHECK_SETTING = 2;
 
     private FusedLocationProviderClient mFusedLocationClient;
+    private GraphHopper mGraphHopper;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +82,7 @@ public class MainActivity extends AppCompatActivity {
 
         }
 
+        prepareGraphHopper();
     }
 
     @Override
@@ -231,5 +236,41 @@ public class MainActivity extends AppCompatActivity {
             Log.d(TAG, "location: " + DateFormat.format("yyyy/MM/dd kk:mm:ss", new Date(loc.getTime())) + ", lat lon : " + loc.getLatitude() + ", " + loc.getLongitude());
         }
     };
+
+    private void prepareGraphHopper() {
+
+        AsyncTask<Void, Void, GraphHopper> task = new AsyncTask<Void, Void, GraphHopper>() {
+            private boolean mHasError = false;
+
+            @Override
+            protected GraphHopper doInBackground(Void... params) {
+                try {
+                    GraphHopper tmp = new GraphHopper().forMobile();
+                    tmp.load(getGraphHopperFolder());
+                    return tmp;
+                } catch (Exception e) {
+                    Log.e(TAG, "Exception occured" , e);
+                    mHasError = true;
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(GraphHopper graphHopper) {
+                super.onPostExecute(graphHopper);
+                if (mHasError) {
+                    // TODO エラー処理
+                } else {
+                    mGraphHopper = graphHopper;
+                }
+                // TODO もし何かするなら
+            }
+        }.execute();
+    }
+
+    private String getGraphHopperFolder() {
+        // TODO 暫定
+        return new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "/com_mori_soft_escape/gh").getAbsolutePath();
+    }
 
 }
