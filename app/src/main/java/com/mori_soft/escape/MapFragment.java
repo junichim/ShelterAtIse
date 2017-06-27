@@ -3,6 +3,7 @@ package com.mori_soft.escape;
 import android.Manifest;
 import android.app.Fragment;
 import android.app.LoaderManager;
+import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
@@ -53,6 +54,7 @@ public class MapFragment extends Fragment {
 
     private final static String MAP_FILE = "japan_multi.map";
     //    private final static String MAP_FILE = "ise_shima.map";
+    private static final String GHZ_COMPRESSED_FILE = "kansai"; // real filename is kansai.ghz
 
     private MapView mMapView;
     private GraphHopper mGraphHopper;
@@ -164,7 +166,7 @@ public class MapFragment extends Fragment {
 
     private void updateShelterMarker(List<NearestShelter.ShelterPath> paths) {
         if (paths == null || paths.size() == 0) {
-            mMapView.getLayerManager().getLayers().clear(); // TODO 現在位置とタイルは大丈夫か？
+//            mMapView.getLayerManager().getLayers().clear(); // TODO 現在位置とタイルは大丈夫か？
             return;
         }
 
@@ -188,7 +190,7 @@ public class MapFragment extends Fragment {
                     tmp.load(getGraphHopperFolder());
                     return tmp;
                 } catch (Exception e) {
-                    Log.e(TAG, "Exception occured" , e);
+                    Log.e(TAG, "Graphhopper file load failed" , e);
                     mHasError = true;
                 }
                 return null;
@@ -209,7 +211,8 @@ public class MapFragment extends Fragment {
 
     private String getGraphHopperFolder() {
         // TODO 暫定
-        return new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "/com_mori_soft_escape/gh").getAbsolutePath();
+//        return new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "/com_mori_soft_escape/gh").getAbsolutePath();
+        return new File(this.getActivity().getExternalFilesDir(null),  "/" + GHZ_COMPRESSED_FILE).getAbsolutePath();
     }
 
 
@@ -239,6 +242,11 @@ public class MapFragment extends Fragment {
 
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+
+            if (data == null || data.getCount() == 0) {
+                MapFragment.this.updateShelterMarker(null); // TODO
+                return;
+            }
 
             // 詰め替え
             List<ShelterEntity> shelters = new ArrayList<ShelterEntity>();
