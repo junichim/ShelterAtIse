@@ -42,4 +42,7 @@ public final class ShelterContract implements BaseColumns {
 
     }
 
+    public static final int DB_INT_TRUE = 1;
+    public static final int DB_INT_FALSE = 0;
+
 }

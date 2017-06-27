@@ -2,7 +2,10 @@ package com.mori_soft.escape;
 
 import android.Manifest;
 import android.app.Fragment;
-import android.content.pm.PackageManager;
+import android.app.LoaderManager;
+import android.content.CursorLoader;
+import android.content.Loader;
+import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.AsyncTask;
@@ -17,6 +20,9 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.graphhopper.GraphHopper;
+import com.mori_soft.escape.entity.ShelterEntity;
+import com.mori_soft.escape.model.NearestShelter;
+import com.mori_soft.escape.provider.ShelterContract;
 
 import org.mapsforge.core.graphics.Bitmap;
 import org.mapsforge.core.model.LatLong;
@@ -31,7 +37,9 @@ import org.mapsforge.map.reader.MapFile;
 import org.mapsforge.map.rendertheme.InternalRenderTheme;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Created by mor on 2017/06/27.
@@ -41,6 +49,8 @@ public class MapFragment extends Fragment {
 
     private static final String TAG = MapFragment.class.getSimpleName();
 
+    private static final int SHELTER_LOADER_ID = 1;
+
     private final static String MAP_FILE = "japan_multi.map";
     //    private final static String MAP_FILE = "ise_shima.map";
 
@@ -49,6 +59,8 @@ public class MapFragment extends Fragment {
 
     private Location mCurrentLocation;
     private Marker mCurrent;
+
+    private List<NearestShelter.ShelterPath> mNearest;
 
     @Nullable
     @Override
@@ -95,6 +107,9 @@ public class MapFragment extends Fragment {
 
         // 経路探索準備
         prepareGraphHopper();
+
+        // 避難所表示
+        this.getLoaderManager().initLoader(SHELTER_LOADER_ID, null, new ShelterLoaderCallbacks());
     }
 
     private void setMapView() {
@@ -147,6 +162,18 @@ public class MapFragment extends Fragment {
         return new Marker(latlong, bitmap, 0, -bitmap.getHeight() / 2);
     }
 
+    private void updateShelterMarker(List<NearestShelter.ShelterPath> paths) {
+        if (paths == null || paths.size() == 0) {
+            mMapView.getLayerManager().getLayers().clear(); // TODO 現在位置とタイルは大丈夫か？
+            return;
+        }
+
+        for (NearestShelter.ShelterPath path : paths) {
+            Marker marker = createMarker(new LatLong(path.shelter.lat, path.shelter.lon), R.drawable.marker_green);
+            mMapView.getLayerManager().getLayers().add(marker);
+        }
+
+    }
 
 
     private void prepareGraphHopper() {
@@ -184,5 +211,78 @@ public class MapFragment extends Fragment {
         // TODO 暫定
         return new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "/com_mori_soft_escape/gh").getAbsolutePath();
     }
+
+
+    private class ShelterLoaderCallbacks implements LoaderManager.LoaderCallbacks<Cursor> {
+
+        @Override
+        public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+            return new CursorLoader(MapFragment.this.getActivity(), ShelterContract.Shelter.CONTENT_URI,
+                    new String[]{
+                            ShelterContract._ID,
+                            ShelterContract.Shelter.ADDRESS,
+                            ShelterContract.Shelter.NAME,
+                            ShelterContract.Shelter.TEL,
+                            ShelterContract.Shelter.DETAIL,
+                            ShelterContract.Shelter.IS_SHELTER,
+                            ShelterContract.Shelter.IS_TSUNAMI,
+                            ShelterContract.Shelter.RANK,
+                            ShelterContract.Shelter.IS_LIVING,
+                            ShelterContract.Shelter.LAT,
+                            ShelterContract.Shelter.LON,
+                    },
+                    null, // TODO where clause
+                    null, // TODO where arguments
+                    null
+                    );
+        }
+
+        @Override
+        public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+
+            // 詰め替え
+            List<ShelterEntity> shelters = new ArrayList<ShelterEntity>();
+
+            data.moveToFirst();
+            do {
+                ShelterEntity ent = new ShelterEntity();
+                ent.recordId    = data.getInt(data.getColumnIndex(ShelterContract._ID));
+                ent.address      = data.getString(data.getColumnIndex(ShelterContract.Shelter.ADDRESS));
+                ent.shelterName = data.getString(data.getColumnIndex(ShelterContract.Shelter.NAME));
+                ent.tel          = data.getString(data.getColumnIndex(ShelterContract.Shelter.TEL));
+                ent.detail       = data.getString(data.getColumnIndex(ShelterContract.Shelter.DETAIL));
+                ent.isShelter   = data.getInt(data.getColumnIndex(ShelterContract.Shelter.IS_SHELTER)) == ShelterContract.DB_INT_TRUE;
+                ent.isTsunami   = data.getInt(data.getColumnIndex(ShelterContract.Shelter.IS_SHELTER)) == ShelterContract.DB_INT_TRUE;
+                ent.ranking     = data.getInt(data.getColumnIndex(ShelterContract.Shelter.RANK));
+                ent.isLiving    = data.getInt(data.getColumnIndex(ShelterContract.Shelter.IS_LIVING)) == ShelterContract.DB_INT_TRUE;
+                ent.lat          = data.getDouble(data.getColumnIndex(ShelterContract.Shelter.LAT));
+                ent.lon          = data.getDouble(data.getColumnIndex(ShelterContract.Shelter.LON));
+            } while (data.moveToNext());
+
+            // 最寄りの避難所検索, 非同期に求める
+            if (null != mCurrentLocation) {
+                AsyncTask<List<ShelterEntity>, Void, List<NearestShelter.ShelterPath>> task = new AsyncTask<List<ShelterEntity>, Void, List<NearestShelter.ShelterPath>>() {
+                    @Override
+                    protected List<NearestShelter.ShelterPath> doInBackground(List<ShelterEntity>... params) {
+                        NearestShelter ns = new NearestShelter(mGraphHopper);
+                        List<NearestShelter.ShelterPath> paths = ns.sortNearestShelter(params[0], mCurrentLocation);
+                        return paths;
+                    }
+
+                    @Override
+                    protected void onPostExecute(List<NearestShelter.ShelterPath> shelterPaths) {
+                        super.onPostExecute(shelterPaths);
+                        MapFragment.this.updateShelterMarker(shelterPaths);
+                    }
+                }.execute(shelters);
+            }
+        }
+
+        @Override
+        public void onLoaderReset(Loader<Cursor> loader) {
+
+        }
+    }
+
 
 }

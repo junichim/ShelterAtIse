@@ -36,9 +36,9 @@ public class NearestShelter {
     }
 
     public static class ShelterPath {
-        ShelterEntity shelter;
-        PathWrapper path;
-        double dist;
+        public ShelterEntity shelter;
+        public PathWrapper path;
+        public double dist;
 
         public ShelterPath(ShelterEntity shlt, PathWrapper pathWrapper, double distance) {
             shelter = shlt;
