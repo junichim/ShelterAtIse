@@ -59,30 +59,22 @@ import static com.google.android.gms.location.LocationServices.getSettingsClient
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
+
     private static final int PERMISSION_REQUEST_CODE_READ_STORAGE = 1;
     private static final int PERMISSION_REQUEST_CODE_LOCATION = 2;
     private static final int GOOGLEPLAYSERVICE_ERROR_DIALOG_CODE = 1;
     private static final int GOOGLEPLAYSERVICE_LOCATION_REQUST_CHECK_SETTING = 2;
 
-    private final static String MAP_FILE = "japan_multi.map";
-    //    private final static String MAP_FILE = "ise_shima.map";
-
-    private MapView mMapView;
-    private GraphHopper mGraphHopper;
-
     private boolean mIsLocationAvailable;
     private FusedLocationProviderClient mFusedLocationClient;
-    private Location mCurrentLocation;
-    private Marker mCurrent;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        AndroidGraphicFactory.createInstance(this.getApplication());
-
         setContentView(R.layout.activity_main);
 
+        // アプリバーの設定
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setLogo(R.mipmap.ic_launcher);
         toolbar.setTitle(R.string.toolbar_title);
@@ -91,36 +83,25 @@ public class MainActivity extends AppCompatActivity {
         toolbar.setSubtitleTextColor(Color.LTGRAY);
         setSupportActionBar(toolbar);
 
-        mMapView = (MapView) findViewById(R.id.mapView);
-
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this.getBaseContext());
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onStart() {
+        super.onStart();
 
-        if (Build.VERSION.SDK_INT >= 23) {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                requestPermission(Manifest.permission.READ_EXTERNAL_STORAGE, PERMISSION_REQUEST_CODE_READ_STORAGE);
-                return;
-            }
+        // パーミッションチェック
+        if (! PermissionUtil.checkPermissionGranted(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
+            PermissionUtil.requestPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE, PERMISSION_REQUEST_CODE_READ_STORAGE);
+        } else {
+            checkGooglePlayService();
         }
-        onGrantedMapDraw();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         mFusedLocationClient.removeLocationUpdates(mLocationCallback);
-    }
-
-    @Override
-    protected void onDestroy() {
-        mMapView.destroyAll();;
-        AndroidGraphicFactory.clearResourceMemoryCache();
-
-        super.onDestroy();
     }
 
     @Override
@@ -144,6 +125,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 break;
             default:
+                Log.w(TAG, "予期せぬActivityResultリクエストコード: " + requestCode);
                 finish();
                 break;
         }
@@ -156,33 +138,24 @@ public class MainActivity extends AppCompatActivity {
         switch (requestCode) {
             case PERMISSION_REQUEST_CODE_READ_STORAGE:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    onGrantedMapDraw();
-                    return;
+                    checkGooglePlayService();
+                } else {
+                    // TODO 地図が表示できないことを説明
                 }
+                break;
             case PERMISSION_REQUEST_CODE_LOCATION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-//                    mIsLocationAvailable = true;
                     setupLocation();
-                    return;
+                } else {
+                    mIsLocationAvailable = false;
+                    // TODO 現在位置を表示できないことを説明
                 }
-                mIsLocationAvailable = false;
+                break;
             default:
+                Log.w(TAG, "予期せぬパーミッションリクエストコード: " + requestCode );
+                finish();
+                break;
         }
-
-        // アプリを終了
-        this.finish();
-    }
-
-    private void onGrantedMapDraw() {
-        // マップ
-        setMapView();
-        displayMap();
-
-        // 経路探索準備
-        prepareGraphHopper();
-
-        // 現在位置表示のための処理
-        checkGooglePlayService();
     }
 
     private void checkGooglePlayService() {
@@ -206,20 +179,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkLocationPermission() {
-        if (Build.VERSION.SDK_INT >= 23) {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                requestPermission(Manifest.permission.ACCESS_FINE_LOCATION, PERMISSION_REQUEST_CODE_LOCATION);
-                return;
-            }
+        if (! PermissionUtil.checkPermissionGranted(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+            PermissionUtil.requestPermission(this, Manifest.permission.ACCESS_FINE_LOCATION, PERMISSION_REQUEST_CODE_LOCATION);
+        } else {
+            setupLocation();
         }
-        setupLocation();
-    }
-
-    private void requestPermission(String permission, int requestCode) {
-        if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
-            // TODO 説明ダイアログの表示と応答
-        }
-        ActivityCompat.requestPermissions(this, new String[]{permission}, requestCode);
     }
 
     @SuppressWarnings("MissingPermission")
@@ -304,93 +268,9 @@ public class MainActivity extends AppCompatActivity {
         public void onLocationResult(LocationResult locationResult) {
             super.onLocationResult(locationResult);
 
-            mCurrentLocation = locationResult.getLastLocation();
-            updateCurrentLocation();
-            Log.d(TAG, "location: " + DateFormat.format("yyyy/MM/dd kk:mm:ss", new Date(mCurrentLocation.getTime())) + ", lat lon : " + mCurrentLocation.getLatitude() + ", " + mCurrentLocation.getLongitude());
+            MapFragment f = (MapFragment) MainActivity.this.getFragmentManager().findFragmentById(R.id.fragment_map);
+            f.updateCurrentLocation(locationResult.getLastLocation());
         }
     };
-
-
-    private void setMapView() {
-        mMapView.setClickable(true);
-        mMapView.getMapScaleBar().setVisible(true);
-        mMapView.setBuiltInZoomControls(true);
-        mMapView.setZoomLevelMin((byte)10);
-        mMapView.setZoomLevelMax((byte)20);
-    }
-
-    private void displayMap() {
-        TileCache tileCache = AndroidUtil.createTileCache(this, "mapcache", mMapView.getModel().displayModel.getTileSize(), 1f, mMapView.getModel().frameBufferModel.getOverdrawFactor() );
-
-        File file = new File(Environment.getExternalStorageDirectory() + "/Download/", MAP_FILE);
-        if (! file.exists()) {
-            Log.e(TAG, "file not found: " + file.getAbsolutePath());
-            finish();
-            return;
-        }
-
-        MapDataStore mds = new MapFile(file);
-        TileRendererLayer trl = new TileRendererLayer(tileCache, mds, mMapView.getModel().mapViewPosition, AndroidGraphicFactory.INSTANCE);
-        trl.setXmlRenderTheme(InternalRenderTheme.DEFAULT);
-
-        mMapView.getLayerManager().getLayers().add(trl);
-
-        mMapView.setCenter(new LatLong(34.491297, 136.709685)); // 伊勢市駅
-        mMapView.setZoomLevel((byte)12);
-    }
-
-
-    private void updateCurrentLocation() {
-        if (mIsLocationAvailable) {
-            if (mCurrent != null) {
-                mMapView.getLayerManager().getLayers().remove(mCurrent);
-            }
-            mCurrent = createMarker(new LatLong(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()), R.drawable.marker_red);
-            mMapView.getLayerManager().getLayers().add(mCurrent);
-        }
-    }
-
-    private Marker createMarker(LatLong latlong, int resource) {
-        Drawable drawable = getResources().getDrawable(resource);
-        Bitmap bitmap = AndroidGraphicFactory.convertToBitmap(drawable);
-        return new Marker(latlong, bitmap, 0, -bitmap.getHeight() / 2);
-    }
-
-
-    private void prepareGraphHopper() {
-
-        AsyncTask<Void, Void, GraphHopper> task = new AsyncTask<Void, Void, GraphHopper>() {
-            private boolean mHasError = false;
-
-            @Override
-            protected GraphHopper doInBackground(Void... params) {
-                try {
-                    GraphHopper tmp = new GraphHopper().forMobile();
-                    tmp.load(getGraphHopperFolder());
-                    return tmp;
-                } catch (Exception e) {
-                    Log.e(TAG, "Exception occured" , e);
-                    mHasError = true;
-                }
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(GraphHopper graphHopper) {
-                super.onPostExecute(graphHopper);
-                if (mHasError) {
-                    // TODO エラー処理
-                } else {
-                    mGraphHopper = graphHopper;
-                }
-                // TODO もし何かするなら
-            }
-        }.execute();
-    }
-
-    private String getGraphHopperFolder() {
-        // TODO 暫定
-        return new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "/com_mori_soft_escape/gh").getAbsolutePath();
-    }
 
 }
