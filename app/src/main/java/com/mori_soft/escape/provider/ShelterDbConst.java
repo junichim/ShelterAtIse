@@ -19,6 +19,7 @@ class ShelterDbConst implements BaseColumns {
     static final String CLM_IS_TSUNAMI = "is_tsunami";
     static final String CLM_RANK = "safty_ranking";
     static final String CLM_IS_LIVING = "is_living";
+    static final String CLM_MEMO = "memo";
     static final String CLM_LAT = "lat";
     static final String CLM_LON = "lon";
     static final String CLM_CR_DATE = "created_date";

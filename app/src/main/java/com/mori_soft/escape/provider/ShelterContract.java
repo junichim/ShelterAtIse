@@ -35,6 +35,7 @@ public final class ShelterContract implements BaseColumns {
         public static final String IS_TSUNAMI = ShelterDbConst.CLM_IS_TSUNAMI;
         public static final String RANK        = ShelterDbConst.CLM_RANK;
         public static final String IS_LIVING  = ShelterDbConst.CLM_IS_LIVING;
+        public static final String MEMO        = ShelterDbConst.CLM_MEMO;
         public static final String LAT = ShelterDbConst.CLM_LAT;
         public static final String LON = ShelterDbConst.CLM_LON;
 

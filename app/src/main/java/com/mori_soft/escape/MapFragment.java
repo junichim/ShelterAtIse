@@ -231,6 +231,7 @@ public class MapFragment extends Fragment {
                             ShelterContract.Shelter.IS_TSUNAMI,
                             ShelterContract.Shelter.RANK,
                             ShelterContract.Shelter.IS_LIVING,
+                            ShelterContract.Shelter.MEMO,
                             ShelterContract.Shelter.LAT,
                             ShelterContract.Shelter.LON,
                     },
@@ -263,6 +264,7 @@ public class MapFragment extends Fragment {
                 ent.isTsunami   = data.getInt(data.getColumnIndex(ShelterContract.Shelter.IS_SHELTER)) == ShelterContract.DB_INT_TRUE;
                 ent.ranking     = data.getInt(data.getColumnIndex(ShelterContract.Shelter.RANK));
                 ent.isLiving    = data.getInt(data.getColumnIndex(ShelterContract.Shelter.IS_LIVING)) == ShelterContract.DB_INT_TRUE;
+                ent.memo         = data.getString(data.getColumnIndex(ShelterContract.Shelter.MEMO));
                 ent.lat          = data.getDouble(data.getColumnIndex(ShelterContract.Shelter.LAT));
                 ent.lon          = data.getDouble(data.getColumnIndex(ShelterContract.Shelter.LON));
             } while (data.moveToNext());

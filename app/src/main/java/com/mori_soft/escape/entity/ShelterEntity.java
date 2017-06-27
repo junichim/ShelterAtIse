@@ -18,6 +18,7 @@ public class ShelterEntity {
     public boolean isTsunami;
     public int ranking;
     public boolean isLiving;
+    public String memo;
     public double lat;
     public double lon;
 
@@ -31,6 +32,7 @@ public class ShelterEntity {
         isTsunami = false;
         ranking = INVALID_RANK;
         isLiving = false;
+        memo = "";
         lat = 0.0;
         lon = 0.0;
     }
