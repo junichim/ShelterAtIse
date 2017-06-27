@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">escape</string>
+    <string name="toolbar_title">避難所検索</string>
+    <string name="toolbar_subtitle">伊勢市内の避難所を表示します</string>
 </resources>

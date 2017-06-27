@@ -5,15 +5,18 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.design.widget.CollapsingToolbarLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.text.format.DateFormat;
 import android.util.Log;
 
@@ -79,6 +82,15 @@ public class MainActivity extends AppCompatActivity {
         AndroidGraphicFactory.createInstance(this.getApplication());
 
         setContentView(R.layout.activity_main);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setLogo(R.mipmap.ic_launcher);
+        toolbar.setTitle(R.string.toolbar_title);
+        toolbar.setTitleTextColor(Color.WHITE);
+        toolbar.setSubtitle(R.string.toolbar_subtitle);
+        toolbar.setSubtitleTextColor(Color.LTGRAY);
+        setSupportActionBar(toolbar);
+
         mMapView = (MapView) findViewById(R.id.mapView);
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this.getBaseContext());
