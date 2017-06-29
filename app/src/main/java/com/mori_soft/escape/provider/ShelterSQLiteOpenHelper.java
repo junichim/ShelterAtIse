@@ -91,7 +91,7 @@ public class ShelterSQLiteOpenHelper extends SQLiteOpenHelper {
             addElm(sb, ent.detail);
             addElm(sb, ent.isShelter);
             addElm(sb, ent.isTsunami);
-            addElm(sb, ent.ranking);
+            addElm(sb, ent.ranking.getRankingValue());
             addElm(sb, ent.isLiving);
             addElm(sb, ent.memo);
             addElm(sb, ent.lat);

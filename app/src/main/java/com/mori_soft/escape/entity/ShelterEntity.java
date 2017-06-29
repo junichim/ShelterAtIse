@@ -1,5 +1,7 @@
 package com.mori_soft.escape.entity;
 
+import com.mori_soft.escape.Util.Ranking;
+
 /**
  * Created by mor on 2017/06/16.
  */
@@ -7,7 +9,6 @@ package com.mori_soft.escape.entity;
 public class ShelterEntity {
 
     public static final int INVALID_ID = -1;
-    public static final int INVALID_RANK = -1;
 
     public int recordId;
     public String address;
@@ -16,7 +17,7 @@ public class ShelterEntity {
     public String detail;
     public boolean isShelter;
     public boolean isTsunami;
-    public int ranking;
+    public Ranking ranking;
     public boolean isLiving;
     public String memo;
     public double lat;
@@ -30,7 +31,7 @@ public class ShelterEntity {
         detail = "";
         isShelter = false;
         isTsunami = false;
-        ranking = INVALID_RANK;
+        ranking = Ranking.INVALID;
         isLiving = false;
         memo = "";
         lat = 0.0;

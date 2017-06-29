@@ -44,7 +44,7 @@ public class ShelterCsvReader {
                 ent.detail      = splt[i++];
                 ent.isShelter   = Boolean.valueOf(splt[i++]);
                 ent.isTsunami   = Boolean.valueOf(splt[i++]);
-                ent.ranking     = getRanking(splt[i++]);
+                ent.ranking     = Ranking.convertRanking(splt[i++]);
                 ent.isLiving    = Boolean.valueOf(splt[i++]);
                 i += 4;
                 ent.memo        = splt[i++];
@@ -61,24 +61,6 @@ public class ShelterCsvReader {
         }
 
         return list;
-    }
-
-    private static int getRanking(String ranking) {
-        if (TextUtils.isEmpty(ranking)){
-            return 0;
-        }
-        switch(ranking) {
-            case "▲":
-                return 1;
-            case "☆":
-                return 2;
-            case "☆☆":
-                return 3;
-            case "☆☆☆":
-                return 4;
-            default:
-                return 0;
-        }
     }
 
 }

@@ -21,7 +21,10 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.graphhopper.GraphHopper;
+import com.mori_soft.escape.Util.MarkerUtils;
+import com.mori_soft.escape.Util.Ranking;
 import com.mori_soft.escape.entity.ShelterEntity;
+import com.mori_soft.escape.map.MarkerWithBubble;
 import com.mori_soft.escape.model.NearestShelter;
 import com.mori_soft.escape.provider.ShelterContract;
 
@@ -146,24 +149,27 @@ public class MapFragment extends Fragment {
     public void updateCurrentLocation(Location loc) {
         mCurrentLocation = loc;
 
-//        if (mIsLocationAvailable) {
-        if (true) { // TODO for test
-            if (mCurrent != null) {
-                mMapView.getLayerManager().getLayers().remove(mCurrent);
-            }
-            mCurrent = createMarker(new LatLong(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()), R.drawable.marker_red);
-            mMapView.getLayerManager().getLayers().add(mCurrent);
+        if (mCurrent != null) {
+            mMapView.getLayerManager().getLayers().remove(mCurrent);
         }
+        mCurrent = MarkerUtils.createCurrentMarker(new LatLong(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()), this.getActivity(), R.drawable.marker_red);
+        mMapView.getLayerManager().getLayers().add(mCurrent);
 
         Log.d(TAG, "location: " + DateFormat.format("yyyy/MM/dd kk:mm:ss", new Date(mCurrentLocation.getTime())) + ", lat lon : " + mCurrentLocation.getLatitude() + ", " + mCurrentLocation.getLongitude());
     }
 
-    private Marker createMarker(LatLong latlong, int resource) {
-        Drawable drawable = getResources().getDrawable(resource);
-        Bitmap bitmap = AndroidGraphicFactory.convertToBitmap(drawable);
-        return new Marker(latlong, bitmap, 0, -bitmap.getHeight() / 2);
+    private void updateShelterMarker(List<ShelterEntity> shelters) {
+        if (shelters == null || shelters.size() == 0) {
+//            mMapView.getLayerManager().getLayers().clear(); // TODO 現在位置とタイルは大丈夫か？
+            return;
+        }
+        for (ShelterEntity ent : shelters) {
+            Marker marker = MarkerUtils.createShelterMarker(ent, this.getActivity(), R.drawable.marker_green, mMapView);
+            mMapView.getLayerManager().getLayers().add(marker);
+        }
     }
 
+/*
     private void updateShelterMarker(List<NearestShelter.ShelterPath> paths) {
         if (paths == null || paths.size() == 0) {
 //            mMapView.getLayerManager().getLayers().clear(); // TODO 現在位置とタイルは大丈夫か？
@@ -176,7 +182,7 @@ public class MapFragment extends Fragment {
         }
 
     }
-
+*/
 
     private void prepareGraphHopper() {
 
@@ -220,6 +226,7 @@ public class MapFragment extends Fragment {
 
         @Override
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+            Log.d(TAG, "onCreateLoader");
             return new CursorLoader(MapFragment.this.getActivity(), ShelterContract.Shelter.CONTENT_URI,
                     new String[]{
                             ShelterContract._ID,
@@ -243,9 +250,10 @@ public class MapFragment extends Fragment {
 
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+            Log.d(TAG, "onLoadFinished");
 
             if (data == null || data.getCount() == 0) {
-                MapFragment.this.updateShelterMarker(null); // TODO
+//                MapFragment.this.updateShelterMarker(null); // TODO
                 return;
             }
 
@@ -261,14 +269,18 @@ public class MapFragment extends Fragment {
                 ent.tel          = data.getString(data.getColumnIndex(ShelterContract.Shelter.TEL));
                 ent.detail       = data.getString(data.getColumnIndex(ShelterContract.Shelter.DETAIL));
                 ent.isShelter   = data.getInt(data.getColumnIndex(ShelterContract.Shelter.IS_SHELTER)) == ShelterContract.DB_INT_TRUE;
-                ent.isTsunami   = data.getInt(data.getColumnIndex(ShelterContract.Shelter.IS_SHELTER)) == ShelterContract.DB_INT_TRUE;
-                ent.ranking     = data.getInt(data.getColumnIndex(ShelterContract.Shelter.RANK));
+                ent.isTsunami   = data.getInt(data.getColumnIndex(ShelterContract.Shelter.IS_TSUNAMI)) == ShelterContract.DB_INT_TRUE;
+                ent.ranking     = Ranking.convertRanking(data.getInt(data.getColumnIndex(ShelterContract.Shelter.RANK)));
                 ent.isLiving    = data.getInt(data.getColumnIndex(ShelterContract.Shelter.IS_LIVING)) == ShelterContract.DB_INT_TRUE;
                 ent.memo         = data.getString(data.getColumnIndex(ShelterContract.Shelter.MEMO));
                 ent.lat          = data.getDouble(data.getColumnIndex(ShelterContract.Shelter.LAT));
                 ent.lon          = data.getDouble(data.getColumnIndex(ShelterContract.Shelter.LON));
+
+                shelters.add(ent);
             } while (data.moveToNext());
 
+            MapFragment.this.updateShelterMarker(shelters);
+/*
             // 最寄りの避難所検索, 非同期に求める
             if (null != mCurrentLocation) {
                 AsyncTask<List<ShelterEntity>, Void, List<NearestShelter.ShelterPath>> task = new AsyncTask<List<ShelterEntity>, Void, List<NearestShelter.ShelterPath>>() {
@@ -286,6 +298,7 @@ public class MapFragment extends Fragment {
                     }
                 }.execute(shelters);
             }
+*/
         }
 
         @Override
