@@ -3,17 +3,14 @@ package com.mori_soft.escape;
 import android.Manifest;
 import android.app.Fragment;
 import android.app.LoaderManager;
-import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
-import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,28 +18,24 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.graphhopper.GraphHopper;
-import com.mori_soft.escape.Util.MarkerUtils;
 import com.mori_soft.escape.Util.Ranking;
 import com.mori_soft.escape.entity.ShelterEntity;
-import com.mori_soft.escape.map.MarkerWithBubble;
+import com.mori_soft.escape.map.MarkerManager;
 import com.mori_soft.escape.model.NearestShelter;
 import com.mori_soft.escape.provider.ShelterContract;
 
-import org.mapsforge.core.graphics.Bitmap;
 import org.mapsforge.core.model.LatLong;
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory;
 import org.mapsforge.map.android.util.AndroidUtil;
 import org.mapsforge.map.android.view.MapView;
 import org.mapsforge.map.datastore.MapDataStore;
 import org.mapsforge.map.layer.cache.TileCache;
-import org.mapsforge.map.layer.overlay.Marker;
 import org.mapsforge.map.layer.renderer.TileRendererLayer;
 import org.mapsforge.map.reader.MapFile;
 import org.mapsforge.map.rendertheme.InternalRenderTheme;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -62,8 +55,10 @@ public class MapFragment extends Fragment {
     private MapView mMapView;
     private GraphHopper mGraphHopper;
 
-    private Location mCurrentLocation;
-    private Marker mCurrent;
+    //private Location mCurrentLocation;
+//    private Marker mCurrent;
+    private MarkerManager mMarkerManager;
+    private List<ShelterEntity> mShelters;
 
     private List<NearestShelter.ShelterPath> mNearest;
 
@@ -106,6 +101,8 @@ public class MapFragment extends Fragment {
     }
 
     private void onGrantedMapDraw() {
+        mMarkerManager = new MarkerManager(this.getActivity(), mMapView);
+
         // マップ
         setMapView();
         displayMap();
@@ -146,43 +143,38 @@ public class MapFragment extends Fragment {
         mMapView.setZoomLevel((byte)12);
     }
 
-    public void updateCurrentLocation(Location loc) {
-        mCurrentLocation = loc;
-
-        if (mCurrent != null) {
-            mMapView.getLayerManager().getLayers().remove(mCurrent);
-        }
-        mCurrent = MarkerUtils.createCurrentMarker(new LatLong(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude()), this.getActivity(), R.drawable.marker_red);
-        mMapView.getLayerManager().getLayers().add(mCurrent);
-
-        Log.d(TAG, "location: " + DateFormat.format("yyyy/MM/dd kk:mm:ss", new Date(mCurrentLocation.getTime())) + ", lat lon : " + mCurrentLocation.getLatitude() + ", " + mCurrentLocation.getLongitude());
+    public void updateCurrentLocation(LatLong loc) {
+        updateCurrentLocation(loc, false);
     }
+    public void updateCurrentLocation(LatLong loc, boolean trySearch) {
+        mMarkerManager.updateCurrentMarker(loc);
 
-    private void updateShelterMarker(List<ShelterEntity> shelters) {
-        if (shelters == null || shelters.size() == 0) {
-//            mMapView.getLayerManager().getLayers().clear(); // TODO 現在位置とタイルは大丈夫か？
-            return;
-        }
-        for (ShelterEntity ent : shelters) {
-            Marker marker = MarkerUtils.createShelterMarker(ent, this.getActivity(), R.drawable.marker_green, mMapView);
-            mMapView.getLayerManager().getLayers().add(marker);
+        // 近傍の避難所探索
+        if (trySearch) {
+            searchNearShelter();
         }
     }
 
-/*
-    private void updateShelterMarker(List<NearestShelter.ShelterPath> paths) {
-        if (paths == null || paths.size() == 0) {
-//            mMapView.getLayerManager().getLayers().clear(); // TODO 現在位置とタイルは大丈夫か？
-            return;
-        }
+    private void searchNearShelter() {
+        AsyncTask<List<ShelterEntity>, Void, List<NearestShelter.ShelterPath>> task = new AsyncTask<List<ShelterEntity>, Void, List<NearestShelter.ShelterPath>>() {
+            @Override
+            protected List<NearestShelter.ShelterPath> doInBackground(List<ShelterEntity>... params) {
+                NearestShelter ns = new NearestShelter(mGraphHopper);
+                LatLong current = mMarkerManager.getCurrentLocation();
+                if (current == null) {
+                    return null;
+                }
+                List<NearestShelter.ShelterPath> paths = ns.sortNearestShelter(params[0], current); // TODO メモリリークへの対応
+                return paths;
+            }
 
-        for (NearestShelter.ShelterPath path : paths) {
-            Marker marker = createMarker(new LatLong(path.shelter.lat, path.shelter.lon), R.drawable.marker_green);
-            mMapView.getLayerManager().getLayers().add(marker);
-        }
-
+            @Override
+            protected void onPostExecute(List<NearestShelter.ShelterPath> shelterPaths) {
+                super.onPostExecute(shelterPaths);
+                mMarkerManager.updateNearShelterMarker(shelterPaths);
+            }
+        }.execute(mShelters);
     }
-*/
 
     private void prepareGraphHopper() {
 
@@ -254,6 +246,7 @@ public class MapFragment extends Fragment {
 
             if (data == null || data.getCount() == 0) {
 //                MapFragment.this.updateShelterMarker(null); // TODO
+                mShelters = null;
                 return;
             }
 
@@ -279,7 +272,8 @@ public class MapFragment extends Fragment {
                 shelters.add(ent);
             } while (data.moveToNext());
 
-            MapFragment.this.updateShelterMarker(shelters);
+            mMarkerManager.updateShelterMarker(shelters);
+            mShelters = shelters;
 /*
             // 最寄りの避難所検索, 非同期に求める
             if (null != mCurrentLocation) {
@@ -296,7 +290,7 @@ public class MapFragment extends Fragment {
                         super.onPostExecute(shelterPaths);
                         MapFragment.this.updateShelterMarker(shelterPaths);
                     }
-                }.execute(shelters);
+                }.execute(mShelters);
             }
 */
         }

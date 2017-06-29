@@ -11,6 +11,8 @@ import com.graphhopper.PathWrapper;
 import com.graphhopper.util.Parameters;
 import com.mori_soft.escape.entity.ShelterEntity;
 
+import org.mapsforge.core.model.LatLong;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -51,13 +53,13 @@ public class NearestShelter {
         mGraphHopper = graphHopper;
     }
 
-    public List<ShelterPath> sortNearestShelter(List<ShelterEntity> shelters, Location current) {
+    public List<ShelterPath> sortNearestShelter(List<ShelterEntity> shelters, LatLong current) {
         List<ShelterPath> list = findPathToShelter(shelters, current);
         Collections.sort(list, new PathComparator());
         return list;
     }
 
-    private List<ShelterPath> findPathToShelter(List<ShelterEntity> shelters, Location current) {
+    private List<ShelterPath> findPathToShelter(List<ShelterEntity> shelters, LatLong current) {
         List<ShelterPath> paths = new ArrayList<ShelterPath>();
 
         for (ShelterEntity shlt : shelters) {

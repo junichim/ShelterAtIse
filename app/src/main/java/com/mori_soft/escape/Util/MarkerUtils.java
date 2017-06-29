@@ -7,6 +7,7 @@ import android.view.View;
 
 import com.mori_soft.escape.entity.ShelterEntity;
 import com.mori_soft.escape.map.MarkerWithBubble;
+import com.mori_soft.escape.model.NearestShelter;
 
 import org.mapsforge.core.graphics.Bitmap;
 import org.mapsforge.core.model.LatLong;
@@ -41,6 +42,20 @@ public class MarkerUtils {
         Bitmap bitmap = AndroidGraphicFactory.convertToBitmap(drawable);
         return new MarkerWithBubble(new LatLong(ent.lat, ent.lon), bitmap, 0, -bitmap.getHeight() / 2, mapView, getMarkerInfoText(ent));
     }
+    public static Marker createShelterMarker(LatLong latlong, String info, Context context, int resource, MapView mapView) {
+        Drawable drawable = context.getResources().getDrawable(resource);
+        Bitmap bitmap = AndroidGraphicFactory.convertToBitmap(drawable);
+        return new MarkerWithBubble(latlong, bitmap, 0, -bitmap.getHeight() / 2, mapView, info);
+    }
+    public static Marker createNearShelterMarker(NearestShelter.ShelterPath path, Context context, int resource, MapView mapView) {
+        Drawable drawable = context.getResources().getDrawable(resource);
+        Bitmap bitmap = AndroidGraphicFactory.convertToBitmap(drawable);
+        return new MarkerWithBubble(new LatLong(path.shelter.lat, path.shelter.lon), bitmap, 0, -bitmap.getHeight() / 2, mapView, getMarkerInfoText(path));
+    }
+
+    public static String getNormalInfoText(String info) {
+        return info.substring(0, info.lastIndexOf("現在位置からの距離: ")-1);
+    }
 
     private static String getMarkerInfoText(ShelterEntity ent) {
         return "名称: " + ent.shelterName + "\n\n" +
@@ -55,5 +70,9 @@ public class MarkerUtils {
     }
     private static String getBooleanString(boolean flg) {
         return flg ? "○" : "";
+    }
+    private static String getMarkerInfoText(NearestShelter.ShelterPath path) {
+        return getMarkerInfoText(path.shelter) + "\n\n" +
+                "現在位置からの距離: " + path.dist + " km";
     }
 }

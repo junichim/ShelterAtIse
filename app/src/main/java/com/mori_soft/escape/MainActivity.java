@@ -30,6 +30,8 @@ import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import org.mapsforge.core.model.LatLong;
+
 import static com.google.android.gms.location.LocationServices.getSettingsClient;
 
 public class MainActivity extends AppCompatActivity {
@@ -219,7 +221,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "getLastLocation: success");
 
                 MapFragment f = (MapFragment) MainActivity.this.getFragmentManager().findFragmentById(R.id.fragment_map);
-                f.updateCurrentLocation(location);
+                f.updateCurrentLocation(new LatLong(location.getLatitude(), location.getLongitude()));
 
                 startLocationUpdate();
             }
@@ -242,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
             super.onLocationResult(locationResult);
 
             MapFragment f = (MapFragment) MainActivity.this.getFragmentManager().findFragmentById(R.id.fragment_map);
-            f.updateCurrentLocation(locationResult.getLastLocation());
+            f.updateCurrentLocation(new LatLong(locationResult.getLastLocation().getLatitude(), locationResult.getLastLocation().getLongitude()), true);
         }
     };
 
