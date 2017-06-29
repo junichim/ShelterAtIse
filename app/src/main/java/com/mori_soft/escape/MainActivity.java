@@ -43,6 +43,11 @@ public class MainActivity extends AppCompatActivity {
     private static final int GOOGLEPLAYSERVICE_ERROR_DIALOG_CODE = 1;
     private static final int GOOGLEPLAYSERVICE_LOCATION_REQUST_CHECK_SETTING = 2;
 
+    private static final int SEC2MSEC = 1000; // 秒 -> ミリ秒 への変換単位
+    private static final int LOCATION_INTERVAL = 10 * SEC2MSEC;         // ミリ秒単位
+    private static final int FASTEST_LOCATION_INTERVAL = 5 * SEC2MSEC; // ミリ秒単位
+
+
     private boolean mIsLocationAvailable;
     private FusedLocationProviderClient mFusedLocationClient;
 
@@ -206,8 +211,8 @@ public class MainActivity extends AppCompatActivity {
 
     private LocationRequest getLocationRequest() {
         LocationRequest req = new LocationRequest();
-        req.setInterval(10000);
-        req.setFastestInterval(5000);
+        req.setInterval(LOCATION_INTERVAL);
+        req.setFastestInterval(FASTEST_LOCATION_INTERVAL);
         req.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
         return req;

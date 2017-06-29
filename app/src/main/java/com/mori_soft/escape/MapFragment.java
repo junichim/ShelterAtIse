@@ -51,6 +51,12 @@ public class MapFragment extends Fragment {
     private static final int SHELTER_LOADER_ID = 1;
     private static final int NEAREST_LOADER_ID = 2;
 
+    private static final int MIN_ZOOM_LEVEL = 12;
+    private static final int MAX_ZOOM_LEVEL = 20;
+    private static final int DEFAULT_ZOOM_LEVEL = 17;
+    private static final double INIT_LAT = 34.491297; // 伊勢市駅
+    private static final double INIT_LON = 136.709685;
+
     private final static String MAP_FILE = "japan_multi.map";
 
     private MapView mMapView;
@@ -118,8 +124,8 @@ public class MapFragment extends Fragment {
         mMapView.setClickable(true);
         mMapView.getMapScaleBar().setVisible(true);
         mMapView.setBuiltInZoomControls(true);
-        mMapView.setZoomLevelMin((byte)10);
-        mMapView.setZoomLevelMax((byte)20);
+        mMapView.setZoomLevelMin((byte)MIN_ZOOM_LEVEL);
+        mMapView.setZoomLevelMax((byte)MAX_ZOOM_LEVEL);
     }
 
     private void displayMap() {
@@ -130,7 +136,6 @@ public class MapFragment extends Fragment {
         if (! file.exists()) {
             Log.e(TAG, "file not found: " + file.getAbsolutePath());
             Toast.makeText(this.getActivity(), "オフライン地図ファイルがありません", Toast.LENGTH_LONG).show(); // TODO エラー処理
-//            finish();
             return;
         }
 
@@ -140,12 +145,13 @@ public class MapFragment extends Fragment {
 
         mMapView.getLayerManager().getLayers().add(trl);
 
-        mMapView.setCenter(new LatLong(34.491297, 136.709685)); // 伊勢市駅
-        mMapView.setZoomLevel((byte)12);
+        mMapView.setCenter(new LatLong(INIT_LAT, INIT_LON));
+        mMapView.setZoomLevel((byte)DEFAULT_ZOOM_LEVEL);
     }
 
     public void updateLastLocation(LatLong loc) {
         mMarkerManager.updateCurrentMarker(loc);
+        mMapView.setCenter(loc);
     }
     public void updateCurrentLocation(LatLong loc) {
         Log.d(TAG, "updateCurrentLocation");
