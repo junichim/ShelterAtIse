@@ -12,7 +12,7 @@ import android.provider.BaseColumns;
 public final class ShelterContract implements BaseColumns {
 
     private static final String PROVIDER = ShelterContentProvider.class.getSimpleName();
-    public static final String AUTHORITY = "com.mori_soft.escape." + PROVIDER;
+    public static final String AUTHORITY = "com.mori_soft.escape.provider." + PROVIDER;
 
     private ShelterContract() {};
 

@@ -18,6 +18,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <provider
+            android:authorities="com.mori_soft.escape.provider.ShelterContentProvider"
+            android:name=".provider.ShelterContentProvider"
+            android:exported="false">
+        </provider>
     </application>
 
 </manifest>

@@ -3,6 +3,7 @@ package com.mori_soft.escape.provider;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 import com.mori_soft.escape.Util.ShelterCsvReader;
 import com.mori_soft.escape.entity.ShelterEntity;
@@ -14,6 +15,8 @@ import java.util.List;
  */
 
 public class ShelterSQLiteOpenHelper extends SQLiteOpenHelper {
+
+    private static final String TAG = ShelterSQLiteOpenHelper.class.getSimpleName();
 
     private static final String DB_NAME = "Shelter.db";
     private static final int DB_VERSION = 1;
@@ -28,10 +31,12 @@ public class ShelterSQLiteOpenHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+        Log.d(TAG, "onCreate");
         db.execSQL(SHELTER_CREATE);
 
         // 初期データ設定
         String sql = createInitialDataSql();
+        //Log.d(TAG, "init sql: " + sql);
         db.execSQL(sql);
     }
 
@@ -53,8 +58,9 @@ public class ShelterSQLiteOpenHelper extends SQLiteOpenHelper {
             ShelterDbConst.CLM_MEMO        + " TEXT             ," +
             ShelterDbConst.CLM_LAT         + " REAL NOT NULL CHECK(" + ShelterDbConst.CLM_LAT + " >= -90  AND " + ShelterDbConst.CLM_LAT + "<= 90 ) ," +
             ShelterDbConst.CLM_LON         + " REAL NOT NULL CHECK(" + ShelterDbConst.CLM_LON + " >= -180 AND " + ShelterDbConst.CLM_LON + "<= 180) ," +
-            ShelterDbConst.CLM_CR_DATE    + " TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP," +
-            ShelterDbConst.CLM_UP_DATE    + " TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP"
+            ShelterDbConst.CLM_CR_DATE    + " TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP ," +
+            ShelterDbConst.CLM_UP_DATE    + " TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP" +
+            ")"
             ;
 
     private static final char DLM = ',';
@@ -67,16 +73,18 @@ public class ShelterSQLiteOpenHelper extends SQLiteOpenHelper {
             ShelterDbConst.CLM_IS_TSUNAMI + DLM +
             ShelterDbConst.CLM_RANK        + DLM +
             ShelterDbConst.CLM_IS_LIVING  + DLM +
-            ShelterDbConst.CLM_MEMO              + ") VALUES (";
+            ShelterDbConst.CLM_MEMO        + DLM +
+            ShelterDbConst.CLM_LAT         + DLM +
+            ShelterDbConst.CLM_LON                + ") VALUES ";
     private static final char SQ = '\'';
 
     private String createInitialDataSql() {
 
-        StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder(INIT_DATA_INSERT);
 
         List<ShelterEntity> list = ShelterCsvReader.parse(mContext, ASSET_FILE_INITIAL_DATA);
         for (ShelterEntity ent : list) {
-            sb.append(INIT_DATA_INSERT);
+            sb.append("(");
             addElm(sb, ent.address);
             addElm(sb, ent.shelterName);
             addElm(sb, ent.tel);
