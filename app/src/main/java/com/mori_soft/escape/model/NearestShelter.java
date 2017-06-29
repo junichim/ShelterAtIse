@@ -41,11 +41,13 @@ public class NearestShelter {
         public ShelterEntity shelter;
         public PathWrapper path;
         public double dist;
+        public LatLong startPoint;
 
-        public ShelterPath(ShelterEntity shlt, PathWrapper pathWrapper, double distance) {
+        public ShelterPath(ShelterEntity shlt, PathWrapper pathWrapper, double distance, LatLong start) {
             shelter = shlt;
             path = pathWrapper;
             dist = distance;
+            startPoint = start;
         }
     }
 
@@ -65,9 +67,9 @@ public class NearestShelter {
         for (ShelterEntity shlt : shelters) {
             PathWrapper path = calcPath(current.getLatitude(), current.getLongitude(), shlt.lat, shlt.lon);
             if (path == null) {
-                paths.add(new ShelterPath(shlt, null, -1.0));
+                paths.add(new ShelterPath(shlt, null, -1.0, current));
             } else {
-                paths.add(new ShelterPath(shlt, path, path.getDistance()));
+                paths.add(new ShelterPath(shlt, path, path.getDistance(), current));
             }
         }
         return paths;

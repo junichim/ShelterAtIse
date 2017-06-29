@@ -52,7 +52,7 @@ public class MapFragment extends Fragment {
     private static final int NEAREST_LOADER_ID = 2;
 
     private static final int MIN_ZOOM_LEVEL = 12;
-    private static final int MAX_ZOOM_LEVEL = 20;
+    private static final int MAX_ZOOM_LEVEL = 22;
     private static final int DEFAULT_ZOOM_LEVEL = 17;
     private static final double INIT_LAT = 34.491297; // 伊勢市駅
     private static final double INIT_LON = 136.709685;
@@ -250,6 +250,7 @@ public class MapFragment extends Fragment {
             Log.d(TAG, "onLoadFinished");
             Log.d(TAG, "data size:" + (data == null ? "null" : data.size()));
             mMarkerManager.updateNearShelterMarker(data);
+            mMarkerManager.updateNearShelterPath(data);
         }
         @Override
         public void onLoaderReset(Loader<List<NearestShelter.ShelterPath>> loader) {

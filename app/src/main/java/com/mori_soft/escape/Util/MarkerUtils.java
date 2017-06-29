@@ -35,7 +35,7 @@ public class MarkerUtils {
     public static Marker createCurrentMarker(LatLong latlong, Context context, int resource) {
         Drawable drawable = context.getResources().getDrawable(resource);
         Bitmap bitmap = AndroidGraphicFactory.convertToBitmap(drawable);
-        return new Marker(latlong, bitmap, 0, -bitmap.getHeight() / 2);
+        return new Marker(latlong, bitmap, 0, 0);
     }
     public static Marker createShelterMarker(ShelterEntity ent, Context context, int resource, MapView mapView) {
         Drawable drawable = context.getResources().getDrawable(resource);
@@ -73,6 +73,6 @@ public class MarkerUtils {
     }
     private static String getMarkerInfoText(NearestShelter.ShelterPath path) {
         return getMarkerInfoText(path.shelter) + "\n\n" +
-                "現在位置からの距離: " + path.dist + " km";
+                "現在位置からの距離: " + String.format("%.2f", path.dist) + " m";
     }
 }
