@@ -59,12 +59,14 @@ public class MapFragment extends Fragment {
 //    private Marker mCurrent;
     private MarkerManager mMarkerManager;
     private List<ShelterEntity> mShelters;
+    private boolean wasSearched; // TODO savedInstanceState へ
 
     private List<NearestShelter.ShelterPath> mNearest;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        Log.d(TAG, "onCreateView");
         View v = inflater.inflate(R.layout.fragment_map, container, false);
         mMapView = (MapView) v.findViewById(R.id.mapView);
         return v;
@@ -74,11 +76,12 @@ public class MapFragment extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         AndroidGraphicFactory.createInstance(this.getActivity().getApplication());
-
+        wasSearched = false;
     }
 
     @Override
     public void onResume() {
+        Log.d(TAG, "onResume");
         super.onResume();
 
         // 地図データにアクセスできる時だけ表示
@@ -89,6 +92,7 @@ public class MapFragment extends Fragment {
 
     @Override
     public void onDestroyView() {
+        Log.d(TAG, "onDestroyView");
         mMapView.destroyAll();;
         AndroidGraphicFactory.clearResourceMemoryCache();
 
@@ -101,6 +105,7 @@ public class MapFragment extends Fragment {
     }
 
     private void onGrantedMapDraw() {
+        Log.d(TAG, "onGrantedMapDraw");
         mMarkerManager = new MarkerManager(this.getActivity(), mMapView);
 
         // マップ
@@ -123,6 +128,7 @@ public class MapFragment extends Fragment {
     }
 
     private void displayMap() {
+        Log.d(TAG, "displayMap");
         TileCache tileCache = AndroidUtil.createTileCache(this.getActivity(), "mapcache", mMapView.getModel().displayModel.getTileSize(), 1f, mMapView.getModel().frameBufferModel.getOverdrawFactor() );
 
         File file = new File(Environment.getExternalStorageDirectory() + "/Download/", MAP_FILE);
@@ -150,15 +156,18 @@ public class MapFragment extends Fragment {
         mMarkerManager.updateCurrentMarker(loc);
 
         // 近傍の避難所探索
-        if (trySearch) {
+        if (trySearch && !wasSearched) {
+            wasSearched = true;
             searchNearShelter();
         }
     }
 
     private void searchNearShelter() {
+        Log.d(TAG, "searchNearShelter");
         AsyncTask<List<ShelterEntity>, Void, List<NearestShelter.ShelterPath>> task = new AsyncTask<List<ShelterEntity>, Void, List<NearestShelter.ShelterPath>>() {
             @Override
             protected List<NearestShelter.ShelterPath> doInBackground(List<ShelterEntity>... params) {
+                Log.d(TAG, "doInBackground");
                 NearestShelter ns = new NearestShelter(mGraphHopper);
                 LatLong current = mMarkerManager.getCurrentLocation();
                 if (current == null) {
@@ -170,6 +179,7 @@ public class MapFragment extends Fragment {
 
             @Override
             protected void onPostExecute(List<NearestShelter.ShelterPath> shelterPaths) {
+                Log.d(TAG, "onPostExecute");
                 super.onPostExecute(shelterPaths);
                 mMarkerManager.updateNearShelterMarker(shelterPaths);
             }
@@ -177,7 +187,7 @@ public class MapFragment extends Fragment {
     }
 
     private void prepareGraphHopper() {
-
+        Log.d(TAG, "prepareGraphHopper");
         AsyncTask<Void, Void, GraphHopper> task = new AsyncTask<Void, Void, GraphHopper>() {
             private boolean mHasError = false;
 
@@ -215,7 +225,6 @@ public class MapFragment extends Fragment {
 
 
     private class ShelterLoaderCallbacks implements LoaderManager.LoaderCallbacks<Cursor> {
-
         @Override
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
             Log.d(TAG, "onCreateLoader");
@@ -239,13 +248,11 @@ public class MapFragment extends Fragment {
                     null
                     );
         }
-
         @Override
         public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
             Log.d(TAG, "onLoadFinished");
 
             if (data == null || data.getCount() == 0) {
-//                MapFragment.this.updateShelterMarker(null); // TODO
                 mShelters = null;
                 return;
             }
@@ -274,27 +281,7 @@ public class MapFragment extends Fragment {
 
             mMarkerManager.updateShelterMarker(shelters);
             mShelters = shelters;
-/*
-            // 最寄りの避難所検索, 非同期に求める
-            if (null != mCurrentLocation) {
-                AsyncTask<List<ShelterEntity>, Void, List<NearestShelter.ShelterPath>> task = new AsyncTask<List<ShelterEntity>, Void, List<NearestShelter.ShelterPath>>() {
-                    @Override
-                    protected List<NearestShelter.ShelterPath> doInBackground(List<ShelterEntity>... params) {
-                        NearestShelter ns = new NearestShelter(mGraphHopper);
-                        List<NearestShelter.ShelterPath> paths = ns.sortNearestShelter(params[0], mCurrentLocation);
-                        return paths;
-                    }
-
-                    @Override
-                    protected void onPostExecute(List<NearestShelter.ShelterPath> shelterPaths) {
-                        super.onPostExecute(shelterPaths);
-                        MapFragment.this.updateShelterMarker(shelterPaths);
-                    }
-                }.execute(mShelters);
-            }
-*/
         }
-
         @Override
         public void onLoaderReset(Loader<Cursor> loader) {
 
