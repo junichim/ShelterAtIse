@@ -93,7 +93,7 @@ public class MarkerManager {
     public void updateCurrentMarker(LatLong location) {
         MarkerId key = new MarkerId(MarkerType.CurrentLocation);
         removeMarker(key);
-        Marker current = MarkerUtils.createCurrentMarker(location, mContext, R.drawable.marker_red);
+        Marker current = MarkerUtils.createCurrentMarker(location, mContext, R.drawable.ic_my_location);
         addMarker(key, current);
 
 //        Log.d(TAG, "location: " + DateFormat.format("yyyy/MM/dd kk:mm:ss", new Date(mCurrentLocation.getTime())) + ", lat lon : " + mCurrentLocation.getLatitude() + ", " + mCurrentLocation.getLongitude());
@@ -132,7 +132,7 @@ public class MarkerManager {
 
             // 追加
             MarkerId key = new MarkerId(MarkerType.NearShelter, id);
-            Marker marker = MarkerUtils.createNearShelterMarker(paths.get(i), mContext, R.drawable.marker_white, mMapView);
+            Marker marker = MarkerUtils.createNearShelterMarker(paths.get(i), mContext, R.drawable.marker_red, mMapView);
             addMarker(key, marker);
 
             mNearShelterId.add(id);
