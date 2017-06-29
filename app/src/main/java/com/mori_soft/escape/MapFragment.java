@@ -3,6 +3,7 @@ package com.mori_soft.escape;
 import android.Manifest;
 import android.app.Fragment;
 import android.app.LoaderManager;
+import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
@@ -22,6 +23,7 @@ import com.mori_soft.escape.Util.Ranking;
 import com.mori_soft.escape.entity.ShelterEntity;
 import com.mori_soft.escape.map.MarkerManager;
 import com.mori_soft.escape.model.NearestShelter;
+import com.mori_soft.escape.model.NearestShelterAsynkTaskLoader;
 import com.mori_soft.escape.provider.ShelterContract;
 
 import org.mapsforge.core.model.LatLong;
@@ -47,20 +49,16 @@ public class MapFragment extends Fragment {
     private static final String TAG = MapFragment.class.getSimpleName();
 
     private static final int SHELTER_LOADER_ID = 1;
+    private static final int NEAREST_LOADER_ID = 2;
 
     private final static String MAP_FILE = "japan_multi.map";
-    //    private final static String MAP_FILE = "ise_shima.map";
-    private static final String GHZ_COMPRESSED_FILE = "kansai"; // real filename is kansai.ghz
 
     private MapView mMapView;
-    private GraphHopper mGraphHopper;
-
-    //private Location mCurrentLocation;
-//    private Marker mCurrent;
     private MarkerManager mMarkerManager;
     private List<ShelterEntity> mShelters;
     private boolean wasSearched; // TODO savedInstanceState へ
 
+    private NearestShelterLoaderCallbacks mNearestLoaderCallbacks = new NearestShelterLoaderCallbacks();
     private List<NearestShelter.ShelterPath> mNearest;
 
     @Nullable
@@ -112,9 +110,6 @@ public class MapFragment extends Fragment {
         setMapView();
         displayMap();
 
-        // 経路探索準備
-        prepareGraphHopper();
-
         // 避難所表示
         this.getLoaderManager().initLoader(SHELTER_LOADER_ID, null, new ShelterLoaderCallbacks());
     }
@@ -149,82 +144,30 @@ public class MapFragment extends Fragment {
         mMapView.setZoomLevel((byte)12);
     }
 
-    public void updateCurrentLocation(LatLong loc) {
-        updateCurrentLocation(loc, false);
+    public void updateLastLocation(LatLong loc) {
+        mMarkerManager.updateCurrentMarker(loc);
     }
-    public void updateCurrentLocation(LatLong loc, boolean trySearch) {
+    public void updateCurrentLocation(LatLong loc) {
+        Log.d(TAG, "updateCurrentLocation");
         mMarkerManager.updateCurrentMarker(loc);
 
         // 近傍の避難所探索
-        if (trySearch && !wasSearched) {
-            wasSearched = true;
+        if (!wasSearched) {
             searchNearShelter();
         }
     }
 
     private void searchNearShelter() {
         Log.d(TAG, "searchNearShelter");
-        AsyncTask<List<ShelterEntity>, Void, List<NearestShelter.ShelterPath>> task = new AsyncTask<List<ShelterEntity>, Void, List<NearestShelter.ShelterPath>>() {
-            @Override
-            protected List<NearestShelter.ShelterPath> doInBackground(List<ShelterEntity>... params) {
-                Log.d(TAG, "doInBackground");
-                NearestShelter ns = new NearestShelter(mGraphHopper);
-                LatLong current = mMarkerManager.getCurrentLocation();
-                if (current == null) {
-                    return null;
-                }
-                List<NearestShelter.ShelterPath> paths = ns.sortNearestShelter(params[0], current); // TODO メモリリークへの対応
-                return paths;
-            }
-
-            @Override
-            protected void onPostExecute(List<NearestShelter.ShelterPath> shelterPaths) {
-                Log.d(TAG, "onPostExecute");
-                super.onPostExecute(shelterPaths);
-                mMarkerManager.updateNearShelterMarker(shelterPaths);
-            }
-        }.execute(mShelters);
-    }
-
-    private void prepareGraphHopper() {
-        Log.d(TAG, "prepareGraphHopper");
-        AsyncTask<Void, Void, GraphHopper> task = new AsyncTask<Void, Void, GraphHopper>() {
-            private boolean mHasError = false;
-
-            @Override
-            protected GraphHopper doInBackground(Void... params) {
-                try {
-                    GraphHopper tmp = new GraphHopper().forMobile();
-                    tmp.load(getGraphHopperFolder());
-                    return tmp;
-                } catch (Exception e) {
-                    Log.e(TAG, "Graphhopper file load failed" , e);
-                    mHasError = true;
-                }
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(GraphHopper graphHopper) {
-                super.onPostExecute(graphHopper);
-                if (mHasError) {
-                    // TODO エラー処理
-                } else {
-                    mGraphHopper = graphHopper;
-                }
-                // TODO もし何かするなら
-            }
-        }.execute();
-    }
-
-    private String getGraphHopperFolder() {
-        // TODO 暫定
-//        return new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "/com_mori_soft_escape/gh").getAbsolutePath();
-        return new File(this.getActivity().getExternalFilesDir(null),  "/" + GHZ_COMPRESSED_FILE).getAbsolutePath();
+        if (mShelters != null) {
+            wasSearched = true;
+            getLoaderManager().restartLoader(NEAREST_LOADER_ID, null, mNearestLoaderCallbacks);
+        }
     }
 
 
     private class ShelterLoaderCallbacks implements LoaderManager.LoaderCallbacks<Cursor> {
+        private final String TAG = ShelterLoaderCallbacks.class.getSimpleName();
         @Override
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
             Log.d(TAG, "onCreateLoader");
@@ -288,5 +231,24 @@ public class MapFragment extends Fragment {
         }
     }
 
+
+    private class NearestShelterLoaderCallbacks implements LoaderManager.LoaderCallbacks<List<NearestShelter.ShelterPath>> {
+        private final String TAG = NearestShelterLoaderCallbacks.class.getSimpleName();
+        @Override
+        public Loader<List<NearestShelter.ShelterPath>> onCreateLoader(int id, Bundle args) {
+            Log.d(TAG, "onCreateLoader");
+            return new NearestShelterAsynkTaskLoader(MapFragment.this.getActivity(), mShelters, mMarkerManager.getCurrentLocation());
+        }
+        @Override
+        public void onLoadFinished(Loader<List<NearestShelter.ShelterPath>> loader, List<NearestShelter.ShelterPath> data) {
+            Log.d(TAG, "onLoadFinished");
+            Log.d(TAG, "data size:" + (data == null ? "null" : data.size()));
+            mMarkerManager.updateNearShelterMarker(data);
+        }
+        @Override
+        public void onLoaderReset(Loader<List<NearestShelter.ShelterPath>> loader) {
+
+        }
+    }
 
 }
