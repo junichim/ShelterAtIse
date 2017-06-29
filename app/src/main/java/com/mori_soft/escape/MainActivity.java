@@ -6,18 +6,11 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
-import android.os.AsyncTask;
-import android.os.Build;
-import android.os.Environment;
 import android.support.annotation.NonNull;
-import android.support.design.widget.CollapsingToolbarLayout;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.text.format.DateFormat;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -36,23 +29,6 @@ import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.graphhopper.GraphHopper;
-
-import org.mapsforge.core.graphics.Bitmap;
-import org.mapsforge.core.model.LatLong;
-import org.mapsforge.core.model.Point;
-import org.mapsforge.map.android.graphics.AndroidGraphicFactory;
-import org.mapsforge.map.android.util.AndroidUtil;
-import org.mapsforge.map.android.view.MapView;
-import org.mapsforge.map.datastore.MapDataStore;
-import org.mapsforge.map.layer.cache.TileCache;
-import org.mapsforge.map.layer.overlay.Marker;
-import org.mapsforge.map.layer.renderer.TileRendererLayer;
-import org.mapsforge.map.reader.MapFile;
-import org.mapsforge.map.rendertheme.InternalRenderTheme;
-
-import java.io.File;
-import java.util.Date;
 
 import static com.google.android.gms.location.LocationServices.getSettingsClient;
 
@@ -118,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
             case GOOGLEPLAYSERVICE_LOCATION_REQUST_CHECK_SETTING:
                 if (resultCode == RESULT_OK) {
                     // 継続的な位置情報の更新
-                    startLocationUpdate();
+                    startLocation();
                     mIsLocationAvailable = true;
                 } else {
                     mIsLocationAvailable = false;
@@ -145,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case PERMISSION_REQUEST_CODE_LOCATION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    setupLocation();
+                    checkCurrentLocationSettings();
                 } else {
                     mIsLocationAvailable = false;
                     // TODO 現在位置を表示できないことを説明
@@ -182,34 +158,12 @@ public class MainActivity extends AppCompatActivity {
         if (! PermissionUtil.checkPermissionGranted(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
             PermissionUtil.requestPermission(this, Manifest.permission.ACCESS_FINE_LOCATION, PERMISSION_REQUEST_CODE_LOCATION);
         } else {
-            setupLocation();
+            checkCurrentLocationSettings();
         }
     }
 
-    @SuppressWarnings("MissingPermission")
-    private void setupLocation() {
-        mFusedLocationClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
-            @Override
-            public void onSuccess(Location location) {
-                if (location != null) {
-                    Log.d(TAG, "lat, lon: " + location.getLatitude() + ", " + location.getLongitude());
-                } else {
-                    Log.d(TAG, "location is null");
-                }
-                // 設定の確認
-                checkCurrentSettings();
-            }
-        }).addOnFailureListener(this, new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.w(TAG, "failed getlastLocation", e);
-                // 設定の確認
-                checkCurrentSettings();
-            }
-        });
-    }
-
-    private void checkCurrentSettings() {
+    private void checkCurrentLocationSettings() {
+        Log.d(TAG, "checkCurrentLocationSettings");
 
         mIsLocationAvailable = false;
 
@@ -227,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
                             ResolvableApiException resolvable = (ResolvableApiException) e;
                             resolvable.startResolutionForResult(MainActivity.this, GOOGLEPLAYSERVICE_LOCATION_REQUST_CHECK_SETTING);
                         } catch (IntentSender.SendIntentException excpt) {
-                            Log.e(TAG, "exception occured: ", excpt);
+                            Log.e(TAG, "exception occured: request setting change dialog", excpt);
                         }
                         break;
                     case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
@@ -242,7 +196,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(LocationSettingsResponse locationSettingsResponse) {
                 mIsLocationAvailable = true;
-                startLocationUpdate();
+                startLocation();
             }
         });
 
@@ -258,9 +212,28 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @SuppressWarnings("MissingPermission")
+    private void startLocation() {
+        mFusedLocationClient.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
+            @Override
+            public void onSuccess(Location location) {
+                Log.d(TAG, "getLastLocation: success");
+
+                MapFragment f = (MapFragment) MainActivity.this.getFragmentManager().findFragmentById(R.id.fragment_map);
+                f.updateCurrentLocation(location);
+
+                startLocationUpdate();
+            }
+        }).addOnFailureListener(this, new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d(TAG, "getLastLocation: failed");
+                startLocationUpdate();
+            }
+        });
+    }
+    @SuppressWarnings("MissingPermission")
     private void startLocationUpdate() {
         mFusedLocationClient.requestLocationUpdates(getLocationRequest(), mLocationCallback, null);
-        Log.d(TAG, "mLocationCallback: " + mLocationCallback.toString());
     }
 
     private LocationCallback mLocationCallback = new LocationCallback(){
