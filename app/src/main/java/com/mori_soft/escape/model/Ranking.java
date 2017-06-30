@@ -1,4 +1,4 @@
-package com.mori_soft.escape.Util;
+package com.mori_soft.escape.model;
 
 import android.text.TextUtils;
 

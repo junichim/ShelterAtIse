@@ -1,6 +1,6 @@
 package com.mori_soft.escape.entity;
 
-import com.mori_soft.escape.Util.Ranking;
+import com.mori_soft.escape.model.Ranking;
 
 /**
  * Created by mor on 2017/06/16.

@@ -2,10 +2,10 @@ package com.mori_soft.escape.Util;
 
 import android.content.Context;
 import android.content.res.AssetManager;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.mori_soft.escape.entity.ShelterEntity;
+import com.mori_soft.escape.model.Ranking;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,7 +13,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringTokenizer;
 
 /**
  * Created by mor on 2017/06/27.
