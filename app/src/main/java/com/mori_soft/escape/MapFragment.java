@@ -34,6 +34,7 @@ import com.mori_soft.escape.entity.ShelterEntity;
 import com.mori_soft.escape.map.MarkerManager;
 import com.mori_soft.escape.model.NearestShelter;
 import com.mori_soft.escape.model.NearestShelterAsynkTaskLoader;
+import com.mori_soft.escape.model.ShelterType;
 import com.mori_soft.escape.provider.ShelterContract;
 
 import org.mapsforge.core.model.LatLong;
@@ -74,6 +75,8 @@ public class MapFragment extends Fragment {
     private List<ShelterEntity> mShelters;
     private boolean wasSearched; // TODO savedInstanceState へ
 
+    private ShelterType mSearchTargetShelterType = ShelterType.INVALID;
+
     private NearestShelterLoaderCallbacks mNearestLoaderCallbacks = new NearestShelterLoaderCallbacks();
     private List<NearestShelter.ShelterPath> mNearest;
 
@@ -108,10 +111,27 @@ public class MapFragment extends Fragment {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
 
-        spinner.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                // TODO
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                Log.d(TAG, "onItemSelected: " + position + ", id: " + id);
+                switch (position) {
+                    case 0:
+                        mSearchTargetShelterType = ShelterType.TSUNAMI;
+                        break;
+                    case 1:
+                        mSearchTargetShelterType = ShelterType.DESIGNATION;
+                        break;
+                    default:
+                        mSearchTargetShelterType = ShelterType.INVALID;
+                }
+                wasSearched = false;
+                MapFragment.this.getLoaderManager().restartLoader(SHELTER_LOADER_ID, null, new ShelterLoaderCallbacks());
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                Log.d(TAG, "onNothingSelected");
             }
         });
     }
@@ -230,6 +250,19 @@ public class MapFragment extends Fragment {
         @Override
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
             Log.d(TAG, "onCreateLoader");
+
+            String where_clause;
+            switch (mSearchTargetShelterType) {
+                case TSUNAMI:
+                    where_clause = ShelterContract.Shelter.IS_TSUNAMI + " = 1 ";
+                    break;
+                case DESIGNATION:
+                    where_clause = ShelterContract.Shelter.IS_SHELTER + " = 1 ";
+                    break;
+                default:
+                    where_clause = null;
+                    break;
+            }
             return new CursorLoader(MapFragment.this.getActivity(), ShelterContract.Shelter.CONTENT_URI,
                     new String[]{
                             ShelterContract._ID,
@@ -245,9 +278,9 @@ public class MapFragment extends Fragment {
                             ShelterContract.Shelter.LAT,
                             ShelterContract.Shelter.LON,
                     },
-                    null, // TODO where clause
-                    null, // TODO where arguments
-                    null
+                    where_clause, // where clause
+                    null,        // where arguments
+                    null         // order by
                     );
         }
         @Override
