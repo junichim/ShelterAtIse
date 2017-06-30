@@ -63,8 +63,8 @@ public class MainActivity extends AppCompatActivity {
 
         // アプリバーの設定
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle("test");
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         Spinner spinner = (Spinner) findViewById(R.id.toolbar_spinner);
         ArrayAdapter adapter = ArrayAdapter.createFromResource(this, R.array.shelter_type, R.layout.spinner_dropdown);
