@@ -12,10 +12,20 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.Nullable;
+import android.support.v4.view.MenuItemCompat;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.graphhopper.GraphHopper;
@@ -73,6 +83,7 @@ public class MapFragment extends Fragment {
         Log.d(TAG, "onCreateView");
         View v = inflater.inflate(R.layout.fragment_map, container, false);
         mMapView = (MapView) v.findViewById(R.id.mapView);
+        this.setHasOptionsMenu(true);
         return v;
     }
 
@@ -81,6 +92,28 @@ public class MapFragment extends Fragment {
         super.onActivityCreated(savedInstanceState);
         AndroidGraphicFactory.createInstance(this.getActivity().getApplication());
         wasSearched = false;
+
+        // 避難所種別スピナーの追加
+        setupSpinner();
+    }
+
+    private void setupSpinner() {
+        // ツールバーのカスタムビューとして追加
+        ActionBar ab = ((AppCompatActivity)this.getActivity()).getSupportActionBar();
+        ab.setDisplayShowCustomEnabled(true);
+        ab.setCustomView(R.layout.action_spinner);
+
+        Spinner spinner = (Spinner) ab.getCustomView().findViewById(R.id.action_spinner);
+        ArrayAdapter adapter = ArrayAdapter.createFromResource(this.getActivity(), R.array.shelter_type, R.layout.spinner_dropdown);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+
+        spinner.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // TODO
+            }
+        });
     }
 
     @Override
@@ -106,6 +139,26 @@ public class MapFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.toolbar_menu, menu);
+
+        MenuItem item = menu.findItem(R.id.action_search);
+        SearchView sv = (SearchView) MenuItemCompat.getActionView(item);
+        sv.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                // TODO
+                return false;
+            }
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
     }
 
     private void onGrantedMapDraw() {

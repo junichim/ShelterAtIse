@@ -9,11 +9,13 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.support.annotation.NonNull;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 
@@ -66,11 +68,6 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        Spinner spinner = (Spinner) findViewById(R.id.toolbar_spinner);
-        ArrayAdapter adapter = ArrayAdapter.createFromResource(this, R.array.shelter_type, R.layout.spinner_dropdown);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinner.setAdapter(adapter);
-
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this.getBaseContext());
     }
 
@@ -90,13 +87,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         mFusedLocationClient.removeLocationUpdates(mLocationCallback);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.toolbar_menu, menu);
-        return true;
     }
 
     @Override
