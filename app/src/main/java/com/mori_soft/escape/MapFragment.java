@@ -1,13 +1,19 @@
 package com.mori_soft.escape;
 
 import android.Manifest;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.Fragment;
 import android.app.LoaderManager;
+import android.app.ProgressDialog;
 import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
@@ -22,6 +28,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -55,6 +62,8 @@ public class MapFragment extends Fragment {
 
     private static final String TAG = MapFragment.class.getSimpleName();
 
+    private static final String FRAGMENT_TAG_DIALOG_PROGRESS = "PROGRESS";
+
     private static final int SHELTER_LOADER_ID = 1;
     private static final int NEAREST_LOADER_ID = 2;
 
@@ -74,7 +83,7 @@ public class MapFragment extends Fragment {
     private ShelterType mSearchTargetShelterType = ShelterType.INVALID;
 
     private NearestShelterLoaderCallbacks mNearestLoaderCallbacks = new NearestShelterLoaderCallbacks();
-    private List<NearestShelter.ShelterPath> mNearest;
+    private ProgressBar mProgressBar;
 
     @Nullable
     @Override
@@ -82,6 +91,7 @@ public class MapFragment extends Fragment {
         Log.d(TAG, "onCreateView");
         View v = inflater.inflate(R.layout.fragment_map, container, false);
         mMapView = (MapView) v.findViewById(R.id.mapView);
+        mProgressBar = (ProgressBar) v.findViewById(R.id.progressBar);
         this.setHasOptionsMenu(true);
         return v;
     }
@@ -124,6 +134,7 @@ public class MapFragment extends Fragment {
                 // 画面表示を更新
                 mLayerManager.updateShelterMarker(mSearchTargetShelterType);
                 // 現在位置を取得したら更新
+                mProgressBar.setVisibility(View.VISIBLE);
                 wasSearched = false;
             }
 
@@ -328,12 +339,18 @@ public class MapFragment extends Fragment {
         @Override
         public Loader<List<NearestShelter.ShelterPath>> onCreateLoader(int id, Bundle args) {
             Log.d(TAG, "onCreateLoader");
+
+            mProgressBar.setVisibility(View.VISIBLE);
+
             return new NearestShelterAsynkTaskLoader(MapFragment.this.getActivity(), mShelters, mLayerManager.getCurrentLocation(), mSearchTargetShelterType);
         }
         @Override
         public void onLoadFinished(Loader<List<NearestShelter.ShelterPath>> loader, List<NearestShelter.ShelterPath> data) {
             Log.d(TAG, "onLoadFinished");
             Log.d(TAG, "data size:" + (data == null ? "null" : data.size()));
+
+            mProgressBar.setVisibility(View.INVISIBLE);
+
             mLayerManager.updateShelterMarker(mSearchTargetShelterType);
             mLayerManager.updateNearShelterMarker(data, mSearchTargetShelterType);
             mLayerManager.updateNearestShelterPath();
