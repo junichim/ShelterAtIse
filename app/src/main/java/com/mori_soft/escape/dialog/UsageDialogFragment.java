@@ -6,6 +6,7 @@ import android.app.DialogFragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +32,8 @@ public class UsageDialogFragment extends DialogFragment {
         builder.setTitle(R.string.usage);
 
         View v = getActivity().getLayoutInflater().inflate(R.layout.dialog_usage, null);
+        TextView tv = (TextView) v.findViewById(R.id.usage_text);
+        tv.setMovementMethod(ScrollingMovementMethod.getInstance());
 
         builder.setView(v);
         builder.setPositiveButton(android.R.string.ok, null);
