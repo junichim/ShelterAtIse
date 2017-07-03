@@ -32,6 +32,7 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.mori_soft.escape.dialog.LegendDialogFragment;
 import com.mori_soft.escape.model.Ranking;
 import com.mori_soft.escape.entity.ShelterEntity;
 import com.mori_soft.escape.map.LayerManager;
@@ -62,7 +63,7 @@ public class MapFragment extends Fragment {
 
     private static final String TAG = MapFragment.class.getSimpleName();
 
-    private static final String FRAGMENT_TAG_DIALOG_PROGRESS = "PROGRESS";
+    private static final String FRAGMENT_TAG_DIALOG_LEGEND = "LEGEND";
 
     private static final int SHELTER_LOADER_ID = 1;
     private static final int NEAREST_LOADER_ID = 2;
@@ -176,6 +177,17 @@ public class MapFragment extends Fragment {
         inflater.inflate(R.menu.toolbar_menu, menu);
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_legend:
+                showLegend();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
     private void onGrantedMapDraw() {
         Log.d(TAG, "onGrantedMapDraw");
         mLayerManager = new LayerManager(this.getActivity(), mMapView);
@@ -237,6 +249,11 @@ public class MapFragment extends Fragment {
             wasSearched = true;
             getLoaderManager().restartLoader(NEAREST_LOADER_ID, null, mNearestLoaderCallbacks);
         }
+    }
+
+    private void showLegend() {
+        DialogFragment f = new LegendDialogFragment();
+        f.show(this.getFragmentManager(), FRAGMENT_TAG_DIALOG_LEGEND);
     }
 
 

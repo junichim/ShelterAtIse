@@ -8,4 +8,10 @@
         <item>指定避難所</item>
     </string-array>
 
+    <string name="legend_current">現在位置</string>
+    <string name="legend_red">最も近い避難所</string>
+    <string name="legend_yellow">２番目および３番目に近い避難所</string>
+    <string name="legend_green">選択した種類の避難所</string>
+    <string name="legend_gray">その他の避難所</string>
+
 </resources>
