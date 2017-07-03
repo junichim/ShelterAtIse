@@ -121,8 +121,10 @@ public class MapFragment extends Fragment {
                     default:
                         mSearchTargetShelterType = ShelterType.INVALID;
                 }
+                // 画面表示を更新
+                mLayerManager.updateShelterMarker(mSearchTargetShelterType);
+                // 現在位置を取得したら更新
                 wasSearched = false;
-                MapFragment.this.getLoaderManager().restartLoader(SHELTER_LOADER_ID, null, new ShelterLoaderCallbacks());
             }
 
             @Override
@@ -310,7 +312,8 @@ public class MapFragment extends Fragment {
                 shelters.add(ent);
             } while (data.moveToNext());
 
-            mLayerManager.updateShelterMarker(shelters);
+            mLayerManager.setShelters(shelters);
+            mLayerManager.updateShelterMarker(mSearchTargetShelterType);
             mShelters = shelters;
         }
         @Override
@@ -325,13 +328,14 @@ public class MapFragment extends Fragment {
         @Override
         public Loader<List<NearestShelter.ShelterPath>> onCreateLoader(int id, Bundle args) {
             Log.d(TAG, "onCreateLoader");
-            return new NearestShelterAsynkTaskLoader(MapFragment.this.getActivity(), mShelters, mLayerManager.getCurrentLocation());
+            return new NearestShelterAsynkTaskLoader(MapFragment.this.getActivity(), mShelters, mLayerManager.getCurrentLocation(), mSearchTargetShelterType);
         }
         @Override
         public void onLoadFinished(Loader<List<NearestShelter.ShelterPath>> loader, List<NearestShelter.ShelterPath> data) {
             Log.d(TAG, "onLoadFinished");
             Log.d(TAG, "data size:" + (data == null ? "null" : data.size()));
-            mLayerManager.updateNearShelterMarker(data);
+            mLayerManager.updateShelterMarker(mSearchTargetShelterType);
+            mLayerManager.updateNearShelterMarker(data, mSearchTargetShelterType);
             mLayerManager.updateNearShelterPath(data);
         }
         @Override

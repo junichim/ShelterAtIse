@@ -7,7 +7,7 @@ final class LayerId {
     static final int INVALID = -1;
 
     private final LayerType mType;
-    private final int mNum; // Shelter, NearShelter の場合に recordId を与える
+    private final int mNum; // SelectedShelter, NearShelter の場合に recordId を与える
 
     public LayerId(LayerType type) {
         mType = type;

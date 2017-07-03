@@ -8,6 +8,7 @@ import com.mori_soft.escape.R;
 import com.mori_soft.escape.Util.MarkerUtils;
 import com.mori_soft.escape.entity.ShelterEntity;
 import com.mori_soft.escape.model.NearestShelter;
+import com.mori_soft.escape.model.ShelterType;
 
 import org.mapsforge.core.graphics.Paint;
 import org.mapsforge.core.graphics.Style;
@@ -24,9 +25,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by mor on 2017/06/29.
+ * マーカー等のLayer管理クラス.
  */
-
 public class LayerManager {
 
     private static final int TOP3 = 3;
@@ -34,12 +34,16 @@ public class LayerManager {
     private Context mContext;
     private MapView mMapView;
 
+    private List<ShelterEntity> mShelters;
+    private List<NearestShelter.ShelterPath> mShelterPaths; // 現在位置を取得できない場合もあるので、
+
     private Map<LayerId, Layer> mMap;
     private List<Integer> mNearShelterId;
 
     public LayerManager(Context context, MapView mapView) {
         mContext = context;
         mMapView = mapView;
+        mShelters = null;
         mMap = new HashMap<LayerId, Layer>();
         mNearShelterId = new ArrayList<Integer>();
     }
@@ -55,26 +59,72 @@ public class LayerManager {
         removeLayer(key);
         Marker current = MarkerUtils.createCurrentMarker(location, mContext, R.drawable.ic_my_location);
         addLayer(key, current);
-
-//        Log.d(TAG, "location: " + DateFormat.format("yyyy/MM/dd kk:mm:ss", new Date(mCurrentLocation.getTime())) + ", lat lon : " + mCurrentLocation.getLatitude() + ", " + mCurrentLocation.getLongitude());
     }
 
-    public void updateShelterMarker(List<ShelterEntity> shelters) {
+    /**
+     * 避難所リストの設定.
+     *
+     * 避難所リスト設定は更新がない限り、一度実行すればよい
+     * @param shelters 避難所リスト
+     */
+    public void setShelters(List<ShelterEntity> shelters) {
         if (shelters == null || shelters.size() == 0) {
-            // TODO 既存のマーカーどうする？
+            // 既存のマーカーを削除
+            removeAllSheltersAndRelated();
             return;
         }
-        for (ShelterEntity ent : shelters) {
-            LayerId key = new LayerId(LayerType.Shelter, ent.recordId);
-            removeLayer(key);
-            Marker marker = MarkerUtils.createShelterMarker(ent, mContext, R.drawable.marker_green, mMapView);
-            addLayer(key, marker);
+        mShelters = shelters;
+    }
+
+    /**
+     * 避難所マーカーの更新.
+     */
+    public void updateShelterMarker(ShelterType shelterType) {
+        if (mShelters == null || mShelters.size() == 0) {
+            return;
+        }
+
+        // 既存のマーカーを削除
+        removeAllSheltersAndRelated();
+
+        // 対象か否かに応じてマーカーを表示
+        for (ShelterEntity ent : mShelters) {
+            final boolean isSelected = isSelectedShelter(shelterType, ent);
+            addShelterMarker(isSelected, ent);
         }
     }
 
-    public void updateNearShelterMarker(List<NearestShelter.ShelterPath> paths) {
+    private boolean isSelectedShelter(ShelterType shelterType, ShelterEntity ent) {
+        boolean isSelected = false;
+        if (shelterType == ShelterType.TSUNAMI && ent.isTsunami) {
+            isSelected = true;
+        } else if (shelterType == ShelterType.DESIGNATION && ent.isShelter) {
+            isSelected = true;
+        }
+        return isSelected;
+    }
+
+    private void addShelterMarker(boolean isSelected, ShelterEntity ent) {
+        LayerType lt = LayerType.Invalid;
+        int resId;
+        if (isSelected) {
+            lt = LayerType.SelectedShelter;
+            resId = R.drawable.marker_green;
+        } else {
+            lt = LayerType.NonSelectedShelter;
+            resId = R.drawable.marker_gray;
+        }
+
+        LayerId key = new LayerId(lt, ent.recordId);
+        Marker marker = MarkerUtils.createShelterMarker(ent, mContext, resId, mMapView);
+        addLayer(key, marker);
+    }
+
+    public void updateNearShelterMarker(List<NearestShelter.ShelterPath> paths, ShelterType shelterType) {
+        mShelterPaths = paths;
+
         // 既存の近傍の避難所を通常の避難所に変換
-        swapAllNearShelterMarkerToShelterMarker();
+        swapAllNearShelterMarkerToShelterMarker(shelterType);
 
         if (paths == null || paths.size() == 0) {
             return;
@@ -85,48 +135,60 @@ public class LayerManager {
         for(int i = 0; i < numPoint; i++) {
             // 近傍となった避難所の通常のマーカーを削除
             final int id = paths.get(i).shelter.recordId;
-            LayerId mid = new LayerId(LayerType.Shelter, id);
+            LayerId mid = new LayerId(LayerType.SelectedShelter, id);
             removeLayer(mid);
 
             // 追加
-            LayerId key = new LayerId(LayerType.NearShelter, id);
-            Marker marker = MarkerUtils.createNearShelterMarker(paths.get(i), mContext, R.drawable.marker_red, mMapView);
+            LayerId key;
+            int resId;
+            if (i == 0) {
+                key = new LayerId(LayerType.NearestShelter, id);
+                resId = R.drawable.marker_red;
+            } else {
+                key = new LayerId(LayerType.NearShelter, id);
+                resId = R.drawable.marker_yellow;
+            }
+            Marker marker = MarkerUtils.createNearShelterMarker(paths.get(i), mContext, resId, mMapView);
             addLayer(key, marker);
 
             mNearShelterId.add(id);
         }
     }
 
+    public void updatePathToShelter(int id) {
+        // TODO
+    }
 
-    private void swapAllNearShelterMarkerToShelterMarker() {
+    private void swapAllNearShelterMarkerToShelterMarker(ShelterType shelterType) {
+
         // 既存の近傍の避難所を通常の避難所に変換
+        removeAllSpecificLayers(new LayerType[] {LayerType.NearestShelter, LayerType.NearShelter});
+
         for(int i = 0; i < mNearShelterId.size(); i++) {
-            swapNearShelterMarkerToShelterMarker(mNearShelterId.get(i));
+            swapNearShelterMarkerToShelterMarker(mNearShelterId.get(i), shelterType);
         }
         mNearShelterId.clear();
     }
-    private void swapNearShelterMarkerToShelterMarker(int id) {
-        // 既存の近傍の避難所
-        LayerId keyNear = new LayerId(LayerType.NearShelter, id);
-        Marker near = (Marker)mMap.get(keyNear);
+    private void swapNearShelterMarkerToShelterMarker(int id, ShelterType shelterType) {
 
-        // 通常の避難所マーカーの生成
-        Marker marker = MarkerUtils.createShelterMarker(near.getLatLong(), MarkerUtils.getNormalInfoText(((MarkerWithBubble)near).getText()), mContext, R.drawable.marker_green, mMapView);
-        LayerId keyGeneric = new LayerId(LayerType.Shelter, id);
-        addLayer(keyGeneric, marker);
-
-        // 既存の近傍の避難所の削除
-        removeLayer(keyNear);
+        for (ShelterEntity ent : mShelters) {
+            if (ent.recordId == id) {
+                final boolean isSelected = isSelectedShelter(shelterType, ent);
+                addShelterMarker(isSelected, ent);
+            }
+        }
     }
 
     public void updateNearShelterPath(List<NearestShelter.ShelterPath> paths) {
-        LayerId key = new LayerId(LayerType.NearPath, 1);
+        LayerId key = new LayerId(LayerType.PathToShelter, 1);
         removeLayer(key);
         if (paths == null || paths.size() == 0) {
             return;
         }
-        Layer line = createPolyline(paths.get(0).path, paths.get(0).startPoint, new LatLong(paths.get(0).shelter.lat, paths.get(0).shelter.lon));
-        addLayer(key, line);
+        if (paths.get(0).dist >= 0) {
+            Layer line = createPolyline(paths.get(0).path, paths.get(0).startPoint, new LatLong(paths.get(0).shelter.lat, paths.get(0).shelter.lon));
+            addLayer(key, line);
+        }
     }
 
     private Polyline createPolyline(PathWrapper response, LatLong start, LatLong end) {
@@ -148,12 +210,41 @@ public class LayerManager {
         return line;
     }
 
+    /**
+     * 避難所及び避難所に関連するLayerを削除.
+     */
+    private void removeAllSheltersAndRelated() {
+        removeAllSpecificLayers(new LayerType[]{
+            LayerType.SelectedShelter,
+            LayerType.NonSelectedShelter,
+            LayerType.NearestShelter,
+            LayerType.NearShelter,
+            LayerType.PathToShelter,
+            });
+        // 近傍の李難所リストもクリア
+        mNearShelterId.clear();
+    }
 
-    private void removeAllSpecificLayer(LayerType markerType) {
+    /**
+     * 指定されたタイプのLayerを削除
+     * @param markerTypes
+     */
+    private void removeAllSpecificLayers(LayerType[] markerTypes) {
+        List<LayerId> target = new ArrayList<LayerId>();
         for (LayerId key : mMap.keySet()) {
-            if (key.getMarkerType() == markerType) {
-                removeLayer(key);
+            for (int i = 0; i < markerTypes.length; i++) {
+                if (key.getMarkerType() == markerTypes[i]) {
+                    Layer layer = mMap.get(key);
+                    if (layer != null) {
+                        mMapView.getLayerManager().getLayers().remove(layer);
+                    }
+                    target.add(key);
+                    break;
+                }
             }
+        }
+        for (LayerId key : target) {
+            mMap.remove(key);
         }
     }
 
@@ -161,8 +252,8 @@ public class LayerManager {
         Layer layer = mMap.get(key);
         if (layer != null) {
             mMapView.getLayerManager().getLayers().remove(layer);
-            mMap.remove(key);
         }
+        mMap.remove(key);
     }
 
     private void addLayer(LayerId key, Layer layer) {

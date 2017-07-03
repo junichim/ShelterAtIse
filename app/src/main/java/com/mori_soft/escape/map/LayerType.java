@@ -6,7 +6,9 @@ package com.mori_soft.escape.map;
 enum LayerType {
     Invalid,
     CurrentLocation,
-    Shelter,
+    SelectedShelter,
+    NonSelectedShelter,
+    NearestShelter,
     NearShelter,
-    NearPath
+    PathToShelter
 }

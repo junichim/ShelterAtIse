@@ -23,12 +23,14 @@ public class NearestShelterAsynkTaskLoader extends AsyncTaskLoader<List<NearestS
 
     private List<ShelterEntity> mShelters;
     private LatLong mCurrent;
+    private ShelterType mShelterType;
     private GraphHopper mGraphHopper;
 
-    public NearestShelterAsynkTaskLoader(Context context, List<ShelterEntity> shelters, LatLong loc) {
+    public NearestShelterAsynkTaskLoader(Context context, List<ShelterEntity> shelters, LatLong loc, ShelterType shelterType) {
         super(context);
         mShelters = shelters;
         mCurrent = loc;
+        mShelterType = shelterType;
         mGraphHopper = GraphHopperWrapper.getInstance(context);
     }
 
@@ -42,11 +44,11 @@ public class NearestShelterAsynkTaskLoader extends AsyncTaskLoader<List<NearestS
     public List<NearestShelter.ShelterPath> loadInBackground() {
         Log.d(TAG, "loadInBackground");
 
-        if (mCurrent == null) {
-            return null;
-        }
+//        if (mCurrent == null) {
+//            return null;
+//        }
         NearestShelter ns = new NearestShelter(mGraphHopper);
-        List<NearestShelter.ShelterPath> paths = ns.sortNearestShelter(mShelters, mCurrent);
+        List<NearestShelter.ShelterPath> paths = ns.sortNearestShelter(mShelters, mCurrent, mShelterType);
         return paths;
     }
 

@@ -18,7 +18,7 @@ public class ShelterSQLiteOpenHelper extends SQLiteOpenHelper {
 
     private static final String TAG = ShelterSQLiteOpenHelper.class.getSimpleName();
 
-    private static final String DB_NAME = "Shelter.db";
+    private static final String DB_NAME = "SelectedShelter.db";
     private static final int DB_VERSION = 1;
     private static final String ASSET_FILE_INITIAL_DATA = "201703_iseshi_shelters.csv";
 
