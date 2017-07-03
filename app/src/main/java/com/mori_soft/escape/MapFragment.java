@@ -27,7 +27,7 @@ import android.widget.Toast;
 
 import com.mori_soft.escape.model.Ranking;
 import com.mori_soft.escape.entity.ShelterEntity;
-import com.mori_soft.escape.map.MarkerManager;
+import com.mori_soft.escape.map.LayerManager;
 import com.mori_soft.escape.model.NearestShelter;
 import com.mori_soft.escape.model.NearestShelterAsynkTaskLoader;
 import com.mori_soft.escape.model.ShelterType;
@@ -67,7 +67,7 @@ public class MapFragment extends Fragment {
     private final static String MAP_FILE = "japan_multi.map";
 
     private MapView mMapView;
-    private MarkerManager mMarkerManager;
+    private LayerManager mLayerManager;
     private List<ShelterEntity> mShelters;
     private boolean wasSearched; // TODO savedInstanceState へ
 
@@ -179,7 +179,7 @@ public class MapFragment extends Fragment {
 
     private void onGrantedMapDraw() {
         Log.d(TAG, "onGrantedMapDraw");
-        mMarkerManager = new MarkerManager(this.getActivity(), mMapView);
+        mLayerManager = new LayerManager(this.getActivity(), mMapView);
 
         // マップ
         setMapView();
@@ -219,12 +219,12 @@ public class MapFragment extends Fragment {
     }
 
     public void updateLastLocation(LatLong loc) {
-        mMarkerManager.updateCurrentMarker(loc);
+        mLayerManager.updateCurrentMarker(loc);
         mMapView.setCenter(loc);
     }
     public void updateCurrentLocation(LatLong loc) {
         Log.d(TAG, "updateCurrentLocation");
-        mMarkerManager.updateCurrentMarker(loc);
+        mLayerManager.updateCurrentMarker(loc);
 
         // 近傍の避難所探索
         if (!wasSearched) {
@@ -310,7 +310,7 @@ public class MapFragment extends Fragment {
                 shelters.add(ent);
             } while (data.moveToNext());
 
-            mMarkerManager.updateShelterMarker(shelters);
+            mLayerManager.updateShelterMarker(shelters);
             mShelters = shelters;
         }
         @Override
@@ -325,14 +325,14 @@ public class MapFragment extends Fragment {
         @Override
         public Loader<List<NearestShelter.ShelterPath>> onCreateLoader(int id, Bundle args) {
             Log.d(TAG, "onCreateLoader");
-            return new NearestShelterAsynkTaskLoader(MapFragment.this.getActivity(), mShelters, mMarkerManager.getCurrentLocation());
+            return new NearestShelterAsynkTaskLoader(MapFragment.this.getActivity(), mShelters, mLayerManager.getCurrentLocation());
         }
         @Override
         public void onLoadFinished(Loader<List<NearestShelter.ShelterPath>> loader, List<NearestShelter.ShelterPath> data) {
             Log.d(TAG, "onLoadFinished");
             Log.d(TAG, "data size:" + (data == null ? "null" : data.size()));
-            mMarkerManager.updateNearShelterMarker(data);
-            mMarkerManager.updateNearShelterPath(data);
+            mLayerManager.updateNearShelterMarker(data);
+            mLayerManager.updateNearShelterPath(data);
         }
         @Override
         public void onLoaderReset(Loader<List<NearestShelter.ShelterPath>> loader) {
