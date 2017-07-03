@@ -7,4 +7,9 @@
         android:title="凡例"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/action_usage"
+        android:title="@string/usage"
+        app:showAsAction="never" />
+
 </menu>
