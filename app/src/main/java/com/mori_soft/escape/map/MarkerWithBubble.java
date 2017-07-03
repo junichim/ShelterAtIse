@@ -82,6 +82,15 @@ public class MarkerWithBubble extends Marker {
     }
 
     @Override
+    protected void onRemove() {
+        //Log.d(TAG, "onRemove");
+        if (mBalloonMarker != null) {
+            mMapView.getLayerManager().getLayers().remove(mBalloonMarker);
+        }
+        super.onRemove();
+    }
+
+    @Override
     public boolean onTap(LatLong geoPoint, Point viewPosition, Point tapPoint) {
 
         Log.d(TAG, "LoaLong: " + geoPoint.getLatitude() + ", " + geoPoint.getLongitude());
