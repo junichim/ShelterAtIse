@@ -174,20 +174,6 @@ public class MapFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.toolbar_menu, menu);
-
-        MenuItem item = menu.findItem(R.id.action_search);
-        SearchView sv = (SearchView) MenuItemCompat.getActionView(item);
-        sv.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String query) {
-                // TODO
-                return false;
-            }
-            @Override
-            public boolean onQueryTextChange(String newText) {
-                return false;
-            }
-        });
     }
 
     private void onGrantedMapDraw() {

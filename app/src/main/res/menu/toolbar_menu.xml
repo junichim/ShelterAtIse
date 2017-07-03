@@ -3,13 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto" >
 
     <item
-        android:id="@+id/action_search"
-        android:icon="@android:drawable/ic_menu_search"
-        android:title="検索"
-        app:actionViewClass="android.support.v7.widget.SearchView"
-        app:showAsAction="always|collapseActionView"/>
-
-    <item
         android:id="@+id/action_settings"
         android:title="設定"
         app:showAsAction="never" />
