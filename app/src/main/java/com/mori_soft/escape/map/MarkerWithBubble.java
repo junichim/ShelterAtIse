@@ -32,22 +32,28 @@ public class MarkerWithBubble extends Marker {
     private Marker mBalloonMarker;
 
     private String mText;
+    private int mId;
     private int mTextSize;
     private int mColor;
+    private OnLongPressListener mLongPressListener;
 
     /**
      * @param latLong          the initial geographical coordinates of this marker (may be null).
      * @param bitmap           the initial {@code Bitmap} of this marker (may be null).
      * @param horizontalOffset the horizontal marker offset.
      * @param verticalOffset   the vertical marker offset.
+     * @param text               the text in information window.
+     * @param id                 the id of this marker.
      */
-    public MarkerWithBubble(LatLong latLong, Bitmap bitmap, int horizontalOffset, int verticalOffset, MapView mapview, String text) {
+    public MarkerWithBubble(LatLong latLong, Bitmap bitmap, int horizontalOffset, int verticalOffset, MapView mapview, String text, int id) {
         super(latLong, bitmap, horizontalOffset, verticalOffset);
         mMapView = mapview;
         mText = text;
+        mId = id;
         mColor = Color.BLACK;
         mTextSize = DEFAULT_TEXT_SIZE;
         mBalloonMarker = null;
+        mLongPressListener = null;
     }
 
     public void setText(String text) {
@@ -55,6 +61,10 @@ public class MarkerWithBubble extends Marker {
     }
     public String getText() {
         return mText;
+    }
+
+    public int getId() {
+        return mId;
     }
 
     public void setTextColor(int color) {
@@ -116,4 +126,23 @@ public class MarkerWithBubble extends Marker {
 
         return MarkerUtils.viewToBitmap(c, tv);
     }
+
+    public interface OnLongPressListener {
+        boolean onLongPress(LatLong tapLatLong, Point layerXY, Point tapXY, int id);
+    }
+
+    public void setOnLongPressListener(OnLongPressListener listener) {
+        mLongPressListener = listener;
+    }
+
+    @Override
+    public boolean onLongPress(LatLong tapLatLong, Point layerXY, Point tapXY) {
+        if (mLongPressListener != null) {
+            if (contains(layerXY, tapXY)) {
+                return mLongPressListener.onLongPress(tapLatLong, layerXY, tapXY, MarkerWithBubble.this.getId());
+            }
+        }
+        return super.onLongPress(tapLatLong, layerXY, tapXY);
+    }
+
 }

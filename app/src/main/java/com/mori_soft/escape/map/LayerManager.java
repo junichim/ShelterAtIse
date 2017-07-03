@@ -2,6 +2,7 @@ package com.mori_soft.escape.map;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.util.Log;
 
 import com.graphhopper.PathWrapper;
 import com.mori_soft.escape.R;
@@ -13,6 +14,7 @@ import com.mori_soft.escape.model.ShelterType;
 import org.mapsforge.core.graphics.Paint;
 import org.mapsforge.core.graphics.Style;
 import org.mapsforge.core.model.LatLong;
+import org.mapsforge.core.model.Point;
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory;
 import org.mapsforge.map.android.view.MapView;
 import org.mapsforge.map.layer.Layer;
@@ -117,6 +119,7 @@ public class LayerManager {
 
         LayerId key = new LayerId(lt, ent.recordId);
         Marker marker = MarkerUtils.createShelterMarker(ent, mContext, resId, mMapView);
+        ((MarkerWithBubble)marker).setOnLongPressListener(mLongPressListener);
         addLayer(key, marker);
     }
 
@@ -149,14 +152,11 @@ public class LayerManager {
                 resId = R.drawable.marker_yellow;
             }
             Marker marker = MarkerUtils.createNearShelterMarker(paths.get(i), mContext, resId, mMapView);
+            ((MarkerWithBubble)marker).setOnLongPressListener(mLongPressListener);
             addLayer(key, marker);
 
             mNearShelterId.add(id);
         }
-    }
-
-    public void updatePathToShelter(int id) {
-        // TODO
     }
 
     private void swapAllNearShelterMarkerToShelterMarker(ShelterType shelterType) {
@@ -179,14 +179,21 @@ public class LayerManager {
         }
     }
 
-    public void updateNearShelterPath(List<NearestShelter.ShelterPath> paths) {
-        LayerId key = new LayerId(LayerType.PathToShelter, 1);
-        removeLayer(key);
-        if (paths == null || paths.size() == 0) {
+    public void updateNearestShelterPath() {
+        if (mShelterPaths == null || mShelterPaths.size() == 0) {
             return;
         }
-        if (paths.get(0).dist >= 0) {
-            Layer line = createPolyline(paths.get(0).path, paths.get(0).startPoint, new LatLong(paths.get(0).shelter.lat, paths.get(0).shelter.lon));
+        NearestShelter.ShelterPath sp = mShelterPaths.get(0);
+        updatePathToShelter(sp);
+    }
+    private void updatePathToShelter(NearestShelter.ShelterPath shelterPath) {
+        LayerId key = new LayerId(LayerType.PathToShelter);
+        removeLayer(key);
+        if (shelterPath == null) {
+            return;
+        }
+        if (shelterPath.dist >= 0) {
+            Layer line = createPolyline(shelterPath.path, shelterPath.startPoint, new LatLong(shelterPath.shelter.lat, shelterPath.shelter.lon));
             addLayer(key, line);
         }
     }
@@ -260,5 +267,20 @@ public class LayerManager {
         mMapView.getLayerManager().getLayers().add(layer);
         mMap.put(key, layer);
     }
+
+    private MarkerWithBubble.OnLongPressListener mLongPressListener = new MarkerWithBubble.OnLongPressListener() {
+        private final String TAG = MarkerWithBubble.OnLongPressListener.class.getSimpleName();
+        @Override
+        public boolean onLongPress(LatLong tapLatLong, Point layerXY, Point tapXY, int id) {
+            Log.d(TAG, "onLongPress: " + id);
+            for (NearestShelter.ShelterPath path : mShelterPaths) {
+                if (path.shelter.recordId == id) {
+                    updatePathToShelter(path);
+                    return true;
+                }
+            }
+            return false;
+        }
+    };
 
 }

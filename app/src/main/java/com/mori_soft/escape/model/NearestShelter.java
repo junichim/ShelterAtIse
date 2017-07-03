@@ -10,6 +10,7 @@ import com.graphhopper.GraphHopper;
 import com.graphhopper.PathWrapper;
 import com.graphhopper.util.Parameters;
 import com.mori_soft.escape.entity.ShelterEntity;
+import com.mori_soft.escape.provider.ShelterContract;
 
 import org.mapsforge.core.model.LatLong;
 
@@ -19,9 +20,8 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Created by mor on 2017/06/23.
+ * 近傍の避難所検索クラス.
  */
-
 public class NearestShelter {
 
     private static final String TAG = NearestShelter.class.getSimpleName();
@@ -65,9 +65,16 @@ public class NearestShelter {
         mGraphHopper = graphHopper;
     }
 
+    /**
+     * 近傍の避難所の検索.
+     *
+     * @param shelters     避難所一覧
+     * @param current      現在位置
+     * @param shelterType  避難所種別
+     * @return 対象の避難所, 対象外の避難所 が現在位置からの距離順に並ぶ
+     */
     public List<ShelterPath> sortNearestShelter(List<ShelterEntity> shelters, LatLong current, ShelterType shelterType) {
         List<ShelterPath> list = findPathToShelter(shelters, current, shelterType);
-        Collections.sort(list, new PathComparator());
         return list;
     }
 
@@ -81,18 +88,22 @@ public class NearestShelter {
             return paths;
         }
 
+        List<ShelterPath> pathsTarget = new ArrayList<ShelterPath>();
+        List<ShelterPath> pathsNonTarget = new ArrayList<ShelterPath>();
+
         for (ShelterEntity shlt : shelters) {
+            PathWrapper path = calcPath(current.getLatitude(), current.getLongitude(), shlt.lat, shlt.lon);
             if (shelterType == ShelterType.TSUNAMI && shlt.isTsunami || shelterType == ShelterType.DESIGNATION && shlt.isShelter) {
-                PathWrapper path = calcPath(current.getLatitude(), current.getLongitude(), shlt.lat, shlt.lon);
-                if (path == null) {
-                    paths.add(new ShelterPath(shlt, null, ShelterPath.INVALID_DIST, current));
-                } else {
-                    paths.add(new ShelterPath(shlt, path, path.getDistance(), current));
-                }
+                addPathResult(pathsTarget, shlt, path, current);
             } else {
-                paths.add(new ShelterPath(shlt, null, ShelterPath.INVALID_DIST, current));
+                addPathResult(pathsNonTarget, shlt, path, current);
             }
         }
+        Collections.sort(pathsTarget, new PathComparator());
+        Collections.sort(pathsNonTarget, new PathComparator());
+
+        paths.addAll(pathsTarget);
+        paths.addAll(pathsNonTarget);
         return paths;
     }
 
@@ -112,5 +123,14 @@ public class NearestShelter {
                 Log.d(TAG, "error: ", th);
         }
         return null;
+    }
+
+    private void addPathResult(List<ShelterPath> lst, ShelterEntity shlt, PathWrapper pathWrapper, LatLong current) {
+        if (pathWrapper == null) {
+            lst.add(new ShelterPath(shlt, null, ShelterPath.INVALID_DIST, current));
+        } else {
+            lst.add(new ShelterPath(shlt, pathWrapper, pathWrapper.getDistance(), current));
+        }
+
     }
 }

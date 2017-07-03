@@ -40,21 +40,12 @@ public class MarkerUtils {
     public static Marker createShelterMarker(ShelterEntity ent, Context context, int resource, MapView mapView) {
         Drawable drawable = context.getResources().getDrawable(resource);
         Bitmap bitmap = AndroidGraphicFactory.convertToBitmap(drawable);
-        return new MarkerWithBubble(new LatLong(ent.lat, ent.lon), bitmap, 0, -bitmap.getHeight() / 2, mapView, getMarkerInfoText(ent));
-    }
-    public static Marker createShelterMarker(LatLong latlong, String info, Context context, int resource, MapView mapView) {
-        Drawable drawable = context.getResources().getDrawable(resource);
-        Bitmap bitmap = AndroidGraphicFactory.convertToBitmap(drawable);
-        return new MarkerWithBubble(latlong, bitmap, 0, -bitmap.getHeight() / 2, mapView, info);
+        return new MarkerWithBubble(new LatLong(ent.lat, ent.lon), bitmap, 0, -bitmap.getHeight() / 2, mapView, getMarkerInfoText(ent), ent.recordId);
     }
     public static Marker createNearShelterMarker(NearestShelter.ShelterPath path, Context context, int resource, MapView mapView) {
         Drawable drawable = context.getResources().getDrawable(resource);
         Bitmap bitmap = AndroidGraphicFactory.convertToBitmap(drawable);
-        return new MarkerWithBubble(new LatLong(path.shelter.lat, path.shelter.lon), bitmap, 0, -bitmap.getHeight() / 2, mapView, getMarkerInfoText(path));
-    }
-
-    public static String getNormalInfoText(String info) {
-        return info.substring(0, info.lastIndexOf("現在位置からの距離: ")-1);
+        return new MarkerWithBubble(new LatLong(path.shelter.lat, path.shelter.lon), bitmap, 0, -bitmap.getHeight() / 2, mapView, getMarkerInfoText(path), path.shelter.recordId);
     }
 
     private static String getMarkerInfoText(ShelterEntity ent) {

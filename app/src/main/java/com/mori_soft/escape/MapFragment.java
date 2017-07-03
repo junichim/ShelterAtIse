@@ -336,7 +336,7 @@ public class MapFragment extends Fragment {
             Log.d(TAG, "data size:" + (data == null ? "null" : data.size()));
             mLayerManager.updateShelterMarker(mSearchTargetShelterType);
             mLayerManager.updateNearShelterMarker(data, mSearchTargetShelterType);
-            mLayerManager.updateNearShelterPath(data);
+            mLayerManager.updateNearestShelterPath();
         }
         @Override
         public void onLoaderReset(Loader<List<NearestShelter.ShelterPath>> loader) {
