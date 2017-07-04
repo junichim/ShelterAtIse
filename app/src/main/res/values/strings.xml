@@ -10,6 +10,7 @@
 
     <string name="legend">凡例</string>
     <string name="usage">使い方</string>
+    <string name="about">このアプリについて</string>
 
     <string name="legend_current">現在位置</string>
     <string name="legend_red">最も近い避難所</string>
@@ -17,6 +18,14 @@
     <string name="legend_green">選択した種類の避難所</string>
     <string name="legend_gray">その他の避難所</string>
 
-    <string name="usage_text">・ 画面上部の避難所種類を選択します。\n・ 現在位置の最寄りの避難所を検索して表示します。\n・ 避難所（マーカー）をタップすると、その避難所の情報が表示されます。\n・ 避難所（マーカー）を長押しすると、現在位置からその避難所までの道順を表示します。</string>
+    <string name="usage_text">伊勢市内の避難所を検索するシンプルなアプリです。\n アプリを起動すると現在位置を取得後、最寄りの避難所を検索して表示します。\n\n・ 画面上部で検索対象の避難所種類を選択できます。\n・ 避難所をタップすると詳しい情報が表示されます。\n・ 避難所を長押しすると現在位置からその避難所までの道順を表示します。</string>
+
+    <string name="about_license_me">本アプリは &lt;a href="http://www.apache.org/licenses/LICENSE-2.0.txt"&gt;Apach License 2.0 のライセンス&lt;/a&gt;にて公開しています。\n &lt;a href=""&gt;プロジェクトサイト&lt;/a&gt;</string>
+    <string name="about_license_opensorce">このアプリでは以下のオープンソースライブラリを利用しています。</string>
+    <string name="about_license_mapsforge">&lt;a href="https://github.com/mapsforge/mapsforge"&gt;Mapsforge&lt;/a&gt;, &lt;a href="http://www.gnu.org/licenses/lgpl-3.0.html"&gt;LGPL v3&lt;/a&gt;</string>
+    <string name="about_license_graphhopper">&lt;a href="https://github.com/graphhopper/graphhopper"&gt;GraphHopper&lt;/a&gt;, &lt;a href="http://www.apache.org/licenses/LICENSE-2.0.txt"&gt;Apache 2.0 License&lt;/a&gt;</string>
+    <string name="about_license_opendata">このアプリで利用している避難所データは、以下の著作物を改変して利用しています。</string>
+    <string name="about_license_shelter">『災害時指定避難場所』、伊勢市、&lt;a href="http://creativecommons.org/licenses/by/2.1/jp/"&gt;クリエイティブ・コモンズ・ライセンス表示2.1日本&lt;/a&gt;</string>
+    <string name="about_license_icon">このアプリでは避難所位置を表すマーカーとして&lt;a href="https://sozai.cman.jp/"&gt;https://sozai.cman.jp/&lt;/a&gt;のアイコンを使用しています。</string>
 
 </resources>

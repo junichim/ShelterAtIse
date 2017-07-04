@@ -32,6 +32,7 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.mori_soft.escape.dialog.AboutDialogFragment;
 import com.mori_soft.escape.dialog.LegendDialogFragment;
 import com.mori_soft.escape.dialog.UsageDialogFragment;
 import com.mori_soft.escape.model.Ranking;
@@ -66,6 +67,7 @@ public class MapFragment extends Fragment {
 
     private static final String FRAGMENT_TAG_DIALOG_LEGEND = "LEGEND";
     private static final String FRAGMENT_TAG_DIALOG_USAGE = "USAGE";
+    private static final String FRAGMENT_TAG_DIALOG_ABOUT = "ABOUT";
 
     private static final int SHELTER_LOADER_ID = 1;
     private static final int NEAREST_LOADER_ID = 2;
@@ -189,6 +191,10 @@ public class MapFragment extends Fragment {
             case R.id.action_usage:
                 dialog = new UsageDialogFragment();
                 showDialog(dialog, FRAGMENT_TAG_DIALOG_USAGE);
+                return true;
+            case R.id.action_about:
+                dialog = new AboutDialogFragment();
+                showDialog(dialog, FRAGMENT_TAG_DIALOG_ABOUT);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
