@@ -32,9 +32,11 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.graphhopper.GraphHopper;
 import com.mori_soft.escape.dialog.AboutDialogFragment;
 import com.mori_soft.escape.dialog.LegendDialogFragment;
 import com.mori_soft.escape.dialog.UsageDialogFragment;
+import com.mori_soft.escape.model.GraphHopperWrapper;
 import com.mori_soft.escape.model.Ranking;
 import com.mori_soft.escape.entity.ShelterEntity;
 import com.mori_soft.escape.map.LayerManager;
@@ -157,6 +159,7 @@ public class MapFragment extends Fragment {
 
         // 地図データにアクセスできる時だけ表示
         if (PermissionUtil.checkPermissionGranted(this.getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)) {
+            prepareMapFiles();
             onGrantedMapDraw();
         }
     }
@@ -198,6 +201,16 @@ public class MapFragment extends Fragment {
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void prepareMapFiles() {
+        // オフラインマップ
+        // TODO
+        // GraphHopper ファイル
+        final boolean res = GraphHopperWrapper.prepareGraphHopperFile(this.getActivity());
+        if (!res) {
+            Log.w(TAG, "GraphHopper ファイルの準備に失敗しました");
         }
     }
 
