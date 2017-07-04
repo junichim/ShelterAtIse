@@ -73,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStart() {
+        Log.d(TAG, "onStart");
         super.onStart();
 
         // パーミッションチェック
@@ -81,6 +82,12 @@ public class MainActivity extends AppCompatActivity {
         } else {
             checkGooglePlayService();
         }
+    }
+
+    @Override
+    protected void onResume() {
+        Log.d(TAG, "onResume");
+        super.onResume();
     }
 
     @Override

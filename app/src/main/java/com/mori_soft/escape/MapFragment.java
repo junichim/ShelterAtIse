@@ -138,11 +138,15 @@ public class MapFragment extends Fragment {
                     default:
                         mSearchTargetShelterType = ShelterType.INVALID;
                 }
-                // 画面表示を更新
-                mLayerManager.updateShelterMarker(mSearchTargetShelterType);
-                // 現在位置を取得したら更新
-                mProgressBar.setVisibility(View.VISIBLE);
-                wasSearched = false;
+
+                // 地図データにアクセスできる時だけ画面表示を更新
+                if (PermissionUtil.checkPermissionGranted(MapFragment.this.getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                    // 画面表示を更新
+                    mLayerManager.updateShelterMarker(mSearchTargetShelterType);
+                    // 現在位置を取得したら更新
+                    mProgressBar.setVisibility(View.VISIBLE);
+                    wasSearched = false;
+                }
             }
 
             @Override
