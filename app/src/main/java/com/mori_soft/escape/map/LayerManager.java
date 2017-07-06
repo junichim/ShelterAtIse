@@ -9,6 +9,7 @@ import com.mori_soft.escape.R;
 import com.mori_soft.escape.Util.MarkerUtils;
 import com.mori_soft.escape.entity.ShelterEntity;
 import com.mori_soft.escape.model.NearestShelter;
+import com.mori_soft.escape.model.ShelterManager;
 import com.mori_soft.escape.model.ShelterType;
 
 import org.mapsforge.core.graphics.Paint;
@@ -36,7 +37,7 @@ public class LayerManager {
     private Context mContext;
     private MapView mMapView;
 
-    private List<ShelterEntity> mShelters;
+    private ShelterManager mShelterManager;
     private List<NearestShelter.ShelterPath> mShelterPaths; // 現在位置を取得できない場合もあるので、
 
     private Map<LayerId, Layer> mMap;
@@ -45,9 +46,13 @@ public class LayerManager {
     public LayerManager(Context context, MapView mapView) {
         mContext = context;
         mMapView = mapView;
-        mShelters = null;
+        mShelterManager = null;
         mMap = new HashMap<LayerId, Layer>();
         mNearShelterId = new ArrayList<Integer>();
+    }
+
+    public ShelterManager getShelterManager() {
+        return mShelterManager;
     }
 
     public LatLong getCurrentLocation() {
@@ -75,14 +80,15 @@ public class LayerManager {
             removeAllSheltersAndRelated();
             return;
         }
-        mShelters = shelters;
+        mShelterManager = new ShelterManager();
+        mShelterManager.setShelters(shelters);
     }
 
     /**
      * 避難所マーカーの更新.
      */
     public void updateShelterMarker(ShelterType shelterType) {
-        if (mShelters == null || mShelters.size() == 0) {
+        if (mShelterManager == null || mShelterManager.size() == 0) {
             return;
         }
 
@@ -90,7 +96,7 @@ public class LayerManager {
         removeAllSheltersAndRelated();
 
         // 対象か否かに応じてマーカーを表示
-        for (ShelterEntity ent : mShelters) {
+        for (ShelterEntity ent : mShelterManager.getValues()) {
             final boolean isSelected = isSelectedShelter(shelterType, ent);
             addShelterMarker(isSelected, ent);
         }
@@ -171,7 +177,7 @@ public class LayerManager {
     }
     private void swapNearShelterMarkerToShelterMarker(int id, ShelterType shelterType) {
 
-        for (ShelterEntity ent : mShelters) {
+        for (ShelterEntity ent : mShelterManager.getValues()) {
             if (ent.recordId == id) {
                 final boolean isSelected = isSelectedShelter(shelterType, ent);
                 addShelterMarker(isSelected, ent);

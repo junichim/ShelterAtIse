@@ -11,6 +11,7 @@ import com.mori_soft.escape.entity.ShelterEntity;
 import org.mapsforge.core.model.LatLong;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -21,12 +22,12 @@ public class NearestShelterAsynkTaskLoader extends AsyncTaskLoader<List<NearestS
 
     private static final String TAG = NearestShelterAsynkTaskLoader.class.getSimpleName();
 
-    private List<ShelterEntity> mShelters;
+    private Collection<ShelterEntity> mShelters;
     private LatLong mCurrent;
     private ShelterType mShelterType;
     private GraphHopper mGraphHopper;
 
-    public NearestShelterAsynkTaskLoader(Context context, List<ShelterEntity> shelters, LatLong loc, ShelterType shelterType) {
+    public NearestShelterAsynkTaskLoader(Context context, Collection<ShelterEntity> shelters, LatLong loc, ShelterType shelterType) {
         super(context);
         mShelters = shelters;
         mCurrent = loc;
@@ -44,9 +45,6 @@ public class NearestShelterAsynkTaskLoader extends AsyncTaskLoader<List<NearestS
     public List<NearestShelter.ShelterPath> loadInBackground() {
         Log.d(TAG, "loadInBackground");
 
-//        if (mCurrent == null) {
-//            return null;
-//        }
         NearestShelter ns = new NearestShelter(mGraphHopper);
         List<NearestShelter.ShelterPath> paths = ns.sortNearestShelter(mShelters, mCurrent, mShelterType);
         return paths;

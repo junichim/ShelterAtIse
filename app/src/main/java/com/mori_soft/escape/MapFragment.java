@@ -77,7 +77,6 @@ public class MapFragment extends Fragment {
 
     private MapView mMapView;
     private LayerManager mLayerManager;
-    private List<ShelterEntity> mShelters;
     private boolean wasSearched;
 
     private ShelterType mSearchTargetShelterType = ShelterType.INVALID;
@@ -244,7 +243,7 @@ public class MapFragment extends Fragment {
 
     private void searchNearShelter() {
         Log.d(TAG, "searchNearShelter");
-        if (mShelters != null) {
+          if (mLayerManager.getShelterManager() != null) {
             wasSearched = true;
             getLoaderManager().restartLoader(NEAREST_LOADER_ID, null, mNearestLoaderCallbacks);
         }
@@ -298,7 +297,6 @@ public class MapFragment extends Fragment {
             Log.d(TAG, "onLoadFinished");
 
             if (data == null || data.getCount() == 0) {
-                mShelters = null;
                 return;
             }
 
@@ -326,7 +324,6 @@ public class MapFragment extends Fragment {
 
             mLayerManager.setShelters(shelters);
             mLayerManager.updateShelterMarker(mSearchTargetShelterType);
-            mShelters = shelters;
         }
         @Override
         public void onLoaderReset(Loader<Cursor> loader) {
@@ -343,7 +340,9 @@ public class MapFragment extends Fragment {
 
             mProgressBar.setVisibility(View.VISIBLE);
 
-            return new NearestShelterAsynkTaskLoader(MapFragment.this.getActivity(), mShelters, mLayerManager.getCurrentLocation(), mSearchTargetShelterType);
+            return new NearestShelterAsynkTaskLoader(MapFragment.this.getActivity(),
+                    (mLayerManager.getShelterManager() != null ? mLayerManager.getShelterManager().getValues() : null),
+                    mLayerManager.getCurrentLocation(), mSearchTargetShelterType);
         }
         @Override
         public void onLoadFinished(Loader<List<NearestShelter.ShelterPath>> loader, List<NearestShelter.ShelterPath> data) {

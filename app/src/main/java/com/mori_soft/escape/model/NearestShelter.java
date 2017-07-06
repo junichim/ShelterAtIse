@@ -15,6 +15,7 @@ import com.mori_soft.escape.provider.ShelterContract;
 import org.mapsforge.core.model.LatLong;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -73,12 +74,12 @@ public class NearestShelter {
      * @param shelterType  避難所種別
      * @return 対象の避難所, 対象外の避難所 が現在位置からの距離順に並ぶ
      */
-    public List<ShelterPath> sortNearestShelter(List<ShelterEntity> shelters, LatLong current, ShelterType shelterType) {
+    public List<ShelterPath> sortNearestShelter(Collection<ShelterEntity> shelters, LatLong current, ShelterType shelterType) {
         List<ShelterPath> list = findPathToShelter(shelters, current, shelterType);
         return list;
     }
 
-    private List<ShelterPath> findPathToShelter(List<ShelterEntity> shelters, LatLong current, ShelterType shelterType) {
+    private List<ShelterPath> findPathToShelter(Collection<ShelterEntity> shelters, LatLong current, ShelterType shelterType) {
         List<ShelterPath> paths = new ArrayList<ShelterPath>();
 
         if (current == null) {
