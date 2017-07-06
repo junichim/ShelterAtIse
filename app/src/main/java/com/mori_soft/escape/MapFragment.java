@@ -36,6 +36,7 @@ import com.graphhopper.GraphHopper;
 import com.mori_soft.escape.dialog.AboutDialogFragment;
 import com.mori_soft.escape.dialog.LegendDialogFragment;
 import com.mori_soft.escape.dialog.UsageDialogFragment;
+import com.mori_soft.escape.map.MapViewSetupper;
 import com.mori_soft.escape.model.GraphHopperWrapper;
 import com.mori_soft.escape.model.Ranking;
 import com.mori_soft.escape.entity.ShelterEntity;
@@ -74,18 +75,10 @@ public class MapFragment extends Fragment {
     private static final int SHELTER_LOADER_ID = 1;
     private static final int NEAREST_LOADER_ID = 2;
 
-    private static final int MIN_ZOOM_LEVEL = 12;
-    private static final int MAX_ZOOM_LEVEL = 22;
-    private static final int DEFAULT_ZOOM_LEVEL = 17;
-    private static final double INIT_LAT = 34.491297; // 伊勢市駅
-    private static final double INIT_LON = 136.709685;
-
-    private final static String MAP_FILE = "japan_multi.map";
-
     private MapView mMapView;
     private LayerManager mLayerManager;
     private List<ShelterEntity> mShelters;
-    private boolean wasSearched; // TODO savedInstanceState へ
+    private boolean wasSearched;
 
     private ShelterType mSearchTargetShelterType = ShelterType.INVALID;
 
@@ -212,9 +205,13 @@ public class MapFragment extends Fragment {
 
     private void prepareMapFiles() {
         // オフラインマップ
-        // TODO
+        boolean res = MapViewSetupper.prepareOfflineMapFile(this.getActivity());
+        if (!res) {
+            Log.w(TAG, "オフラインマップ ファイルの準備に失敗しました");
+        }
+
         // GraphHopper ファイル
-        final boolean res = GraphHopperWrapper.prepareGraphHopperFile(this.getActivity());
+        res = GraphHopperWrapper.prepareGraphHopperFile(this.getActivity());
         if (!res) {
             Log.w(TAG, "GraphHopper ファイルの準備に失敗しました");
         }
@@ -225,40 +222,10 @@ public class MapFragment extends Fragment {
         mLayerManager = new LayerManager(this.getActivity(), mMapView);
 
         // マップ
-        setMapView();
-        displayMap();
+        MapViewSetupper.setupMapView(this.getActivity(), mMapView);
 
         // 避難所表示
         this.getLoaderManager().initLoader(SHELTER_LOADER_ID, null, new ShelterLoaderCallbacks());
-    }
-
-    private void setMapView() {
-        mMapView.setClickable(true);
-        mMapView.getMapScaleBar().setVisible(true);
-        mMapView.setBuiltInZoomControls(true);
-        mMapView.setZoomLevelMin((byte)MIN_ZOOM_LEVEL);
-        mMapView.setZoomLevelMax((byte)MAX_ZOOM_LEVEL);
-    }
-
-    private void displayMap() {
-        Log.d(TAG, "displayMap");
-        TileCache tileCache = AndroidUtil.createTileCache(this.getActivity(), "mapcache", mMapView.getModel().displayModel.getTileSize(), 1f, mMapView.getModel().frameBufferModel.getOverdrawFactor() );
-
-        File file = new File(Environment.getExternalStorageDirectory() + "/Download/", MAP_FILE);
-        if (! file.exists()) {
-            Log.e(TAG, "file not found: " + file.getAbsolutePath());
-            Toast.makeText(this.getActivity(), "オフライン地図ファイルがありません", Toast.LENGTH_LONG).show(); // TODO エラー処理
-            return;
-        }
-
-        MapDataStore mds = new MapFile(file);
-        TileRendererLayer trl = new TileRendererLayer(tileCache, mds, mMapView.getModel().mapViewPosition, AndroidGraphicFactory.INSTANCE);
-        trl.setXmlRenderTheme(InternalRenderTheme.DEFAULT);
-
-        mMapView.getLayerManager().getLayers().add(trl);
-
-        mMapView.setCenter(new LatLong(INIT_LAT, INIT_LON));
-        mMapView.setZoomLevel((byte)DEFAULT_ZOOM_LEVEL);
     }
 
     public void updateLastLocation(LatLong loc) {
