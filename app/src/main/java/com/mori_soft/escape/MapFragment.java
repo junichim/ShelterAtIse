@@ -144,8 +144,10 @@ public class MapFragment extends Fragment {
                     // 画面表示を更新
                     mLayerManager.updateShelterMarker(mSearchTargetShelterType);
                     // 現在位置を取得したら更新
-                    mProgressBar.setVisibility(View.VISIBLE);
-                    wasSearched = false;
+                    if (mLayerManager.getCurrentLocation() != null) {
+                        mProgressBar.setVisibility(View.VISIBLE);
+                        wasSearched = false;
+                    }
                 }
             }
 
