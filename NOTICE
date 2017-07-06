@@ -1,0 +1,16 @@
+避難所検索＠伊勢 は Apache license, Version 2.0 の元公開しています。
+
+Copyright 2017 森純一
+
+本アプリは以下のオープンソースソフトウェアを含んでいます。
+
+    mapsforge, LGPL v3
+    GraphHopper, Apache 2.0
+
+本アプリは以下のオープンデータを利用しています。
+
+    OpenStreetmap, ODbL
+    
+本アプリで利用している避難所データは、以下の著作物を改変して利用しています。
+
+    『災害時指定避難場所』、伊勢市、クリエイティブ・コモンズ・ライセンス表示2.1日本(http://creativecommons.org/licenses/by/2.1/jp/)
