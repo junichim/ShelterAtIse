@@ -53,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    private static final int PERMISSION_REQUEST_CODE_READ_STORAGE = 1;
+    private static final int PERMISSION_REQUEST_CODE_WRITE_STORAGE = 1;
     private static final int PERMISSION_REQUEST_CODE_LOCATION = 2;
     private static final int GOOGLEPLAYSERVICE_ERROR_DIALOG_CODE = 1;
     private static final int GOOGLEPLAYSERVICE_LOCATION_REQUST_CHECK_SETTING = 2;
@@ -86,8 +86,8 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
 
         // パーミッションチェック
-        if (! PermissionUtil.checkPermissionGranted(this, Manifest.permission.READ_EXTERNAL_STORAGE)) {
-            PermissionUtil.requestPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE, PERMISSION_REQUEST_CODE_READ_STORAGE);
+        if (! PermissionUtil.checkPermissionGranted(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            PermissionUtil.requestPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_REQUEST_CODE_WRITE_STORAGE);
         } else {
             checkGooglePlayService();
         }
@@ -137,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         switch (requestCode) {
-            case PERMISSION_REQUEST_CODE_READ_STORAGE:
+            case PERMISSION_REQUEST_CODE_WRITE_STORAGE:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     checkGooglePlayService();
                 } else {

@@ -131,7 +131,7 @@ public class MapFragment extends Fragment {
                 }
 
                 // 地図データにアクセスできる時だけ画面表示を更新
-                if (PermissionUtil.checkPermissionGranted(MapFragment.this.getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                if (PermissionUtil.checkPermissionGranted(MapFragment.this.getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
                     // 画面表示を更新
                     mLayerManager.updateShelterMarker(mSearchTargetShelterType);
                     // 現在位置を取得したら更新
@@ -155,7 +155,7 @@ public class MapFragment extends Fragment {
         super.onResume();
 
         // 地図データにアクセスできる時だけ表示
-        if (PermissionUtil.checkPermissionGranted(this.getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)) {
+        if (PermissionUtil.checkPermissionGranted(this.getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
             prepareMapFiles();
             onGrantedMapDraw();
         }
