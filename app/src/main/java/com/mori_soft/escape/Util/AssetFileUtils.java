@@ -28,7 +28,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 /**
- * Created by mor on 2017/07/04.
+ * アセット内ファイル関係のユーティリティクラス.
  */
 
 public class AssetFileUtils {

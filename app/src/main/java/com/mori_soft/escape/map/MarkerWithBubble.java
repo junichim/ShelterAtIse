@@ -32,7 +32,7 @@ import org.mapsforge.map.android.view.MapView;
 import org.mapsforge.map.layer.overlay.Marker;
 
 /**
- * Created by mor on 2017/05/29.
+ * 吹き出し付きマーカー.
  */
 
 public class MarkerWithBubble extends Marker {

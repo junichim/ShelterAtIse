@@ -18,7 +18,7 @@ package com.mori_soft.escape.model;
 import android.text.TextUtils;
 
 /**
- * Created by mor on 2017/06/29.
+ * 安全度ランク.
  */
 
 public enum Ranking {

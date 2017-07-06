@@ -16,7 +16,11 @@
 package com.mori_soft.escape.map;
 
 /**
- * Created by mor on 2017/07/03.
+ * レイヤーIDクラス.
+ *
+ * レイヤー種別と個別の識別IDからなる。
+ * なお、レイヤー種類によっては１つのみが存在するため、
+ * 識別IDの指定を行わない場合もある。
  */
 final class LayerId {
     static final int INVALID = -1;

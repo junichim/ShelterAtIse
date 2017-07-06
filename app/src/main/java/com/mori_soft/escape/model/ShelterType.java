@@ -16,7 +16,9 @@
 package com.mori_soft.escape.model;
 
 /**
- * Created by mor on 2017/07/01.
+ * 伊勢市の定義による避難所種類.
+ *
+ * @see <a href="http://www.city.ise.mie.jp/8280.htm">避難所の考え方と指定の避難所</a>
  */
 
 public enum ShelterType {

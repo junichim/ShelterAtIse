@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by mor on 2017/06/27.
+ * CSV形式避難所データ読み込みクラス.
  */
 
 public class ShelterCsvReader {

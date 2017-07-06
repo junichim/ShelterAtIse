@@ -33,10 +33,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 
-/**
- * Created by mor on 2017/06/29.
- */
-
 public class GraphHopperWrapper {
 
     private static final String TAG = GraphHopperWrapper.class.getSimpleName();

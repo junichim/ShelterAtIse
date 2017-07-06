@@ -24,10 +24,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-/**
- * Created by mor on 2017/07/06.
- */
-
 public class ShelterManager {
 
     private Map<Integer, ShelterEntity> mShelters;

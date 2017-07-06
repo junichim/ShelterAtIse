@@ -18,7 +18,7 @@ package com.mori_soft.escape.entity;
 import com.mori_soft.escape.model.Ranking;
 
 /**
- * Created by mor on 2017/06/16.
+ * 避難所データ.
  */
 
 public class ShelterEntity {

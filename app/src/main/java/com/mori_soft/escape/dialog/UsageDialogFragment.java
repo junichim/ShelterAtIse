@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by mor on 2017/07/03.
+ * 『使い方』ダイアログ.
  */
 
 public class UsageDialogFragment extends DialogFragment {

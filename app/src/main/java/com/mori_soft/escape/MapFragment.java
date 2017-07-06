@@ -60,7 +60,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by mor on 2017/06/27.
+ * 地図表示Fragment.
  */
 
 public class MapFragment extends Fragment {

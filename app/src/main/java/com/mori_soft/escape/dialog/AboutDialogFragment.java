@@ -28,7 +28,7 @@ import android.widget.TextView;
 import com.mori_soft.escape.R;
 
 /**
- * Created by mor on 2017/07/03.
+ * 『このアプリについて』ダイアログ.
  */
 
 public class AboutDialogFragment extends DialogFragment {

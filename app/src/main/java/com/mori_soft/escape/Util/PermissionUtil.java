@@ -23,7 +23,7 @@ import android.os.Build;
 import android.support.v4.app.ActivityCompat;
 
 /**
- * Created by mor on 2017/06/27.
+ * パーミッション関係のユーティリティクラス.
  */
 
 public class PermissionUtil {

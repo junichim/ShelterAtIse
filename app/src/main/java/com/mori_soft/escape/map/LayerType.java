@@ -16,14 +16,14 @@
 package com.mori_soft.escape.map;
 
 /**
- * Created by mor on 2017/07/03.
+ * 地図レイヤー種類.
  */
 enum LayerType {
     Invalid,
-    CurrentLocation,
-    SelectedShelter,
-    NonSelectedShelter,
-    NearestShelter,
-    NearShelter,
-    PathToShelter
+    CurrentLocation,     // 現在位置
+    SelectedShelter,     // 表示対象の避難所
+    NonSelectedShelter, // 表示対象外の避難所
+    NearestShelter,      // 最も近い避難所
+    NearShelter,         // 近傍の避難所
+    PathToShelter        // 避難所までの経路
 }

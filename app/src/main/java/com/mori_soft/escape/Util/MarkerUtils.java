@@ -31,7 +31,7 @@ import org.mapsforge.map.android.view.MapView;
 import org.mapsforge.map.layer.overlay.Marker;
 
 /**
- * Created by mor on 2017/05/30.
+ * マーカー関係のユーティリティクラス.
  */
 
 public class MarkerUtils {

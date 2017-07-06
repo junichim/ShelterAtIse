@@ -35,7 +35,7 @@ import org.mapsforge.map.rendertheme.InternalRenderTheme;
 import java.io.File;
 
 /**
- * Created by mor on 2017/07/06.
+ * MapView設定クラス.
  */
 
 public class MapViewSetupper {

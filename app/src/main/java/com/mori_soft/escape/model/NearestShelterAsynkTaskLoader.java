@@ -30,7 +30,7 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * Created by mor on 2017/06/29.
+ * 近傍の避難所検索のためのAsyncTaskLoader.
  */
 
 public class NearestShelterAsynkTaskLoader extends AsyncTaskLoader<List<NearestShelter.ShelterPath>> {
