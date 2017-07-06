@@ -26,8 +26,7 @@
     <string name="about_license_graphhopper">&lt;a href="https://github.com/graphhopper/graphhopper"&gt;GraphHopper&lt;/a&gt;, &lt;a href="http://www.apache.org/licenses/LICENSE-2.0.txt"&gt;Apache 2.0 License&lt;/a&gt;</string>
     <string name="about_license_opendata">このアプリでは以下のオープンデータを利用しています。</string>
     <string name="about_license_shelter">このアプリで利用している避難所データは、以下の著作物を改変して利用しています。\n『災害時指定避難場所』、伊勢市、&lt;a href="http://creativecommons.org/licenses/by/2.1/jp/"&gt;クリエイティブ・コモンズ・ライセンス表示2.1日本&lt;/a&gt;</string>
-    <string name="about_license_offline">bbbike</string>
-    <string name="about_license_osm">openStreetMap</string>
-    <string name="about_license_icon">このアプリでは避難所位置を表すマーカーとして&lt;a href="https://sozai.cman.jp/"&gt;https://sozai.cman.jp/&lt;/a&gt;のアイコンを使用しています。</string>
+    <string name="about_license_osm">&lt;a href="https://www.openstreetmap.org/"&gt;OpenStreetMap&lt;/a&gt;, &lt;a href="https://opendatacommons.org/licenses/odbl/"&gt;Open Data Commons OpenDatabase License&lt;/a&gt;</string>
+    <string name="about_license_icon">このアプリでは避難所位置を表すマーカーとして&lt;a href="https://sozai.cman.jp/"&gt;https://sozai.cman.jp/&lt;/a&gt;の画像を使用しています。</string>
 
 </resources>
