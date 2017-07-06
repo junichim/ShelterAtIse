@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.mori_soft.escape;
+package com.mori_soft.escape.Util;
 
 import android.Manifest;
 import android.app.Activity;
