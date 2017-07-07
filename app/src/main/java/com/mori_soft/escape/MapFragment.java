@@ -37,6 +37,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.mori_soft.escape.Util.PermissionUtil;
 import com.mori_soft.escape.dialog.AboutDialogFragment;
@@ -184,6 +185,14 @@ public class MapFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.action_search:
+                if (mLayerManager.getCurrentLocation() != null) {
+                    if (! isSearching()) {
+                        Toast.makeText(this.getActivity(), "現在地の最寄りの避難所を検索します。", Toast.LENGTH_SHORT).show();
+                        searchNearShelter();
+                    }
+                }
+                return true;
             case R.id.action_legend:
                 DialogFragment dialog = new LegendDialogFragment();
                 showDialog(dialog, FRAGMENT_TAG_DIALOG_LEGEND);
@@ -246,6 +255,10 @@ public class MapFragment extends Fragment {
             wasSearched = true;
             getLoaderManager().restartLoader(NEAREST_LOADER_ID, null, mNearestLoaderCallbacks);
         }
+    }
+
+    private boolean isSearching() {
+        return mProgressBar.getVisibility() == View.VISIBLE;
     }
 
     private void showDialog(DialogFragment f, String tag) {

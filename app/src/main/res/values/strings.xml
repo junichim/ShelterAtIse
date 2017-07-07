@@ -6,6 +6,7 @@
         <item>指定避難所</item>
     </string-array>
 
+    <string name="search">最寄りの避難所を検索</string>
     <string name="legend">凡例</string>
     <string name="usage">使い方</string>
     <string name="about">このアプリについて</string>
