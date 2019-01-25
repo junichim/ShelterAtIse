@@ -129,14 +129,20 @@ public class NearestShelter {
         req.getHints().put(Parameters.Routing.INSTRUCTIONS, "false");
 
         GHResponse res = mGraphHopper.route(req);
+        if (res.hasErrors()) {
+            Log.w(TAG, "route calculation has error: ");
+            for (Throwable th : res.getErrors())
+                Log.w(TAG, "error: ", th);
+            return null;
+        }
         PathWrapper path = res.getBest();
         if (path != null) {
             if (!path.hasErrors()) {
                 return path;
             }
-            Log.d(TAG, "route calculation has error: ");
+            Log.w(TAG, "route calculation has error: ");
             for (Throwable th : path.getErrors())
-                Log.d(TAG, "error: ", th);
+                Log.w(TAG, "error: ", th);
         }
         return null;
     }
