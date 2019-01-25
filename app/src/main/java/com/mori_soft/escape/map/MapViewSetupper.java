@@ -42,7 +42,7 @@ public class MapViewSetupper {
 
     private static final String TAG = MapViewSetupper.class.getSimpleName();
 
-    private static final int MIN_ZOOM_LEVEL = 12;
+    private static final int MIN_ZOOM_LEVEL = 1;
     private static final int MAX_ZOOM_LEVEL = 22;
     private static final int DEFAULT_ZOOM_LEVEL = 17;
     private static final double INIT_LAT = 34.491297; // 伊勢市駅
