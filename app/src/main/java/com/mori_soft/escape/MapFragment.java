@@ -247,8 +247,11 @@ public class MapFragment extends Fragment {
         mLayerManager.updateCurrentMarker(loc);
 
         // 近傍の避難所探索
-        if (!wasSearched) {
-            searchNearShelter();
+        if (LocationUtil.isInTargetArea(loc)) {
+            Log.d(TAG, "waSearched: " + wasSearched);
+            if (!wasSearched) {
+                searchNearShelter();
+            }
         }
     }
 
