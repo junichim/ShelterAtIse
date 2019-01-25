@@ -24,6 +24,7 @@ import com.graphhopper.GHResponse;
 import com.graphhopper.GraphHopper;
 import com.graphhopper.PathWrapper;
 import com.graphhopper.util.Parameters;
+import com.mori_soft.escape.Util.LocationUtil;
 import com.mori_soft.escape.entity.ShelterEntity;
 import com.mori_soft.escape.provider.ShelterContract;
 
@@ -97,7 +98,7 @@ public class NearestShelter {
     private List<ShelterPath> findPathToShelter(Collection<ShelterEntity> shelters, LatLong current, ShelterType shelterType) {
         List<ShelterPath> paths = new ArrayList<ShelterPath>();
 
-        if (current == null) {
+        if (current == null || ! LocationUtil.isInTargetArea(current)) {
             for (ShelterEntity shlt : shelters) {
                 paths.add(new ShelterPath(shlt, null, ShelterPath.INVALID_DIST, current));
             }
