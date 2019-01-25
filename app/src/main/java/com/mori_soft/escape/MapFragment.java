@@ -39,6 +39,7 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.mori_soft.escape.Util.LocationUtil;
 import com.mori_soft.escape.Util.PermissionUtil;
 import com.mori_soft.escape.dialog.AboutDialogFragment;
 import com.mori_soft.escape.dialog.LegendDialogFragment;
@@ -237,7 +238,9 @@ public class MapFragment extends Fragment {
 
     public void updateLastLocation(LatLong loc) {
         mLayerManager.updateCurrentMarker(loc);
-        mMapView.setCenter(loc);
+        if (LocationUtil.isInTargetArea(loc)) {
+            mMapView.setCenter(loc);
+        }
     }
     public void updateCurrentLocation(LatLong loc) {
         Log.d(TAG, "updateCurrentLocation");
