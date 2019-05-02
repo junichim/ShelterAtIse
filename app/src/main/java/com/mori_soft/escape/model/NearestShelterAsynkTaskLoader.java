@@ -60,6 +60,11 @@ public class NearestShelterAsynkTaskLoader extends AsyncTaskLoader<List<NearestS
     public List<NearestShelter.ShelterPath> loadInBackground() {
         Log.d(TAG, "loadInBackground");
 
+        if (null == mGraphHopper) {
+            Log.w(TAG, "no Graphhopper instance. Skip nearest shelter calculation.");
+            return null;
+        }
+
         NearestShelter ns = new NearestShelter(mGraphHopper);
         List<NearestShelter.ShelterPath> paths = ns.sortNearestShelter(mShelters, mCurrent, mShelterType);
         return paths;

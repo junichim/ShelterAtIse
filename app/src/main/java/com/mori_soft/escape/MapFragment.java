@@ -372,6 +372,10 @@ public class MapFragment extends Fragment {
             mLayerManager.updateShelterMarker(mSearchTargetShelterType);
             mLayerManager.updateNearShelterMarker(data, mSearchTargetShelterType);
             mLayerManager.updateNearestShelterPath();
+
+            if (data == null || data.size() == 0) {
+                Toast.makeText(MapFragment.this.getActivity(), "経路検索ができませんでした。アプリおよび経路情報ファイルが最新であるか確認してください。", Toast.LENGTH_LONG).show();
+            }
         }
         @Override
         public void onLoaderReset(Loader<List<NearestShelter.ShelterPath>> loader) {

@@ -129,6 +129,10 @@ public class NearestShelter {
         GHRequest req = new GHRequest(lat1, lon1, lat2, lon2).setAlgorithm(Parameters.Algorithms.DIJKSTRA_BI); // TODO アルゴリズム
         req.getHints().put(Parameters.Routing.INSTRUCTIONS, "false");
 
+        if (null == mGraphHopper) {
+            return null;
+        }
+
         GHResponse res = mGraphHopper.route(req);
         if (res.hasErrors()) {
             Log.w(TAG, "route calculation has error: ");
