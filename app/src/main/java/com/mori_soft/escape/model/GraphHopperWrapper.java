@@ -21,6 +21,7 @@ import android.util.Log;
 
 import com.graphhopper.GraphHopper;
 import com.mori_soft.escape.Util.AssetFileUtils;
+import com.mori_soft.escape.Util.FileUtil;
 import com.mori_soft.escape.entity.ShelterEntity;
 
 import java.io.BufferedInputStream;
@@ -48,6 +49,16 @@ public class GraphHopperWrapper {
         return mGraphHopper;
     }
 
+    /**
+     * Graphhopper の準備
+     *
+     * 経路情報ファイルを読み込む。
+     * ここでは、 ghz ファイルを指定することを想定する。
+     * graphhopper#load 内部にて、unzip処理が行われる。
+     *
+     * @param context
+     * @return
+     */
     private static GraphHopper prepareGraphHopper(Context context) {
         Log.d(TAG, "prepareGraphHopper");
         try {
@@ -56,6 +67,8 @@ public class GraphHopperWrapper {
             return tmp;
         } catch (Exception e) {
             Log.e(TAG, "Graphhopper file load failed" , e);
+            // 読み込みに失敗した場合は、ファイルを消去する
+            clearGhzFiles(context);
             return null;
         }
     }
@@ -78,6 +91,15 @@ public class GraphHopperWrapper {
         }
 
         return AssetFileUtils.copyFromAsset(context, GHZ_COMPRESSED_FILE + SUFX_GHZ, ghz.getAbsolutePath());
+    }
+
+    private static void clearGhzFiles(Context context) {
+        final String ghz_folder = getGraphHopperFolder(context);
+        File gh = new File(ghz_folder);
+        File ghz = new File(ghz_folder + SUFX_GHZ);
+
+        FileUtil.forceDelete(gh);
+        FileUtil.forceDelete(ghz);
     }
 
 }
