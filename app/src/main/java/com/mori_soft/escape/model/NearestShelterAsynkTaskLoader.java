@@ -15,9 +15,9 @@
  */
 package com.mori_soft.escape.model;
 
-import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.os.AsyncTask;
+import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
 
 import com.graphhopper.GraphHopper;

@@ -244,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "getLastLocation: success");
 
                 if (location != null) {
-                    MapFragment f = (MapFragment) MainActivity.this.getFragmentManager().findFragmentById(R.id.fragment_map);
+                    MapFragment f = (MapFragment) MainActivity.this.getSupportFragmentManager().findFragmentById(R.id.fragment_map);
                     f.updateLastLocation(new LatLong(location.getLatitude(), location.getLongitude()));
                 }
 
@@ -268,7 +268,7 @@ public class MainActivity extends AppCompatActivity {
         public void onLocationResult(LocationResult locationResult) {
             super.onLocationResult(locationResult);
 
-            MapFragment f = (MapFragment) MainActivity.this.getFragmentManager().findFragmentById(R.id.fragment_map);
+            MapFragment f = (MapFragment) MainActivity.this.getSupportFragmentManager().findFragmentById(R.id.fragment_map);
             f.updateCurrentLocation(new LatLong(locationResult.getLastLocation().getLatitude(), locationResult.getLastLocation().getLongitude()));
         }
     };
