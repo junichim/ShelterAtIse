@@ -115,6 +115,9 @@ public class MapFragment extends Fragment implements UpdateConfirmationDialogFra
 
         // 避難所種別スピナーの追加
         setupSpinner();
+
+        // レイヤーマネージャ
+        mLayerManager = new LayerManager(this.getActivity(), mMapView);
     }
 
     private void setupSpinner() {
@@ -187,6 +190,7 @@ public class MapFragment extends Fragment implements UpdateConfirmationDialogFra
 
     @Override
     public void onPause() {
+        Log.d(TAG, "onPause");
         super.onPause();
     }
 
@@ -240,13 +244,20 @@ public class MapFragment extends Fragment implements UpdateConfirmationDialogFra
 
     private void onGrantedMapDraw() {
         Log.d(TAG, "onGrantedMapDraw");
-        mLayerManager = new LayerManager(this.getActivity(), mMapView);
 
         // マップ
         MapViewSetupper.setupMapView(this.getActivity(), mMapView);
 
         // 避難所表示
-        this.getLoaderManager().initLoader(SHELTER_LOADER_ID, null, new ShelterLoaderCallbacks());
+        if (mLayerManager.isSetShelters()) {
+            updateShelter();
+        } else {
+            this.getLoaderManager().initLoader(SHELTER_LOADER_ID, null, new ShelterLoaderCallbacks());
+        }
+    }
+
+    private void updateShelter() {
+        mLayerManager.updateShelterMarker(mSearchTargetShelterType);
     }
 
     public void updateLastLocation(LatLong loc) {
@@ -361,8 +372,7 @@ public class MapFragment extends Fragment implements UpdateConfirmationDialogFra
             } while (data.moveToNext());
 
             mLayerManager.setShelters(shelters);
-            mLayerManager.updateShelterMarker(mSearchTargetShelterType);
-
+            updateShelter();
 
             // 一定時間後、最新のオフラインマップがあるか確認処理を呼び出す
             mHandler.postDelayed(new Runnable(){

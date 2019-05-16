@@ -84,6 +84,14 @@ public class LayerManager {
     }
 
     /**
+     * 避難所情報がセット済みか否か
+     * @return
+     */
+    public boolean isSetShelters() {
+        return  mShelterManager != null && mShelterManager.size() > 0;
+    }
+
+    /**
      * 避難所リストの設定.
      *
      * 避難所リスト設定は更新がない限り、一度実行すればよい
