@@ -18,6 +18,7 @@ package com.mori_soft.escape;
 import android.Manifest;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
@@ -43,7 +44,10 @@ import com.mori_soft.escape.Util.LocationUtil;
 import com.mori_soft.escape.Util.PermissionUtil;
 import com.mori_soft.escape.dialog.AboutDialogFragment;
 import com.mori_soft.escape.dialog.LegendDialogFragment;
+import com.mori_soft.escape.dialog.UpdateConfirmationDialogFragment;
 import com.mori_soft.escape.dialog.UsageDialogFragment;
+import com.mori_soft.escape.download.OfflineMapCheckerAsyncTaskLoader;
+import com.mori_soft.escape.download.OfflineMapDownLoaderAsyncTaskLoader;
 import com.mori_soft.escape.map.MapViewSetupper;
 import com.mori_soft.escape.model.GraphHopperWrapper;
 import com.mori_soft.escape.model.Ranking;
@@ -65,16 +69,21 @@ import java.util.List;
  * 地図表示Fragment.
  */
 
-public class MapFragment extends Fragment {
+public class MapFragment extends Fragment implements UpdateConfirmationDialogFragment.onUpdateListener {
 
     private static final String TAG = MapFragment.class.getSimpleName();
 
     private static final String FRAGMENT_TAG_DIALOG_LEGEND = "LEGEND";
     private static final String FRAGMENT_TAG_DIALOG_USAGE = "USAGE";
     private static final String FRAGMENT_TAG_DIALOG_ABOUT = "ABOUT";
+    private static final String FRAGMENT_TAG_DIALOG_UPDATE = "UPDATE";
 
     private static final int SHELTER_LOADER_ID = 1;
     private static final int NEAREST_LOADER_ID = 2;
+    private static final int CHECK_UPDATE_LOADER_ID = 3;
+    private static final int UPDATE_LOADER_ID = 4;
+
+    private static final int DELAY_CHECK_UPDATE = 10 * 1000; // オフラインマップ更新チェックまでの時間 (ms)
 
     private MapView mMapView;
     private LayerManager mLayerManager;
@@ -82,8 +91,9 @@ public class MapFragment extends Fragment {
 
     private ShelterType mSearchTargetShelterType = ShelterType.INVALID;
 
-    private NearestShelterLoaderCallbacks mNearestLoaderCallbacks = new NearestShelterLoaderCallbacks();
+    private NearestShelterLoaderCallbacks mNearestLoaderCallbacks;
     private ProgressBar mProgressBar;
+    private Handler mHandler;
 
     @Nullable
     @Override
@@ -92,6 +102,7 @@ public class MapFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_map, container, false);
         mMapView = (MapView) v.findViewById(R.id.mapView);
         mProgressBar = (ProgressBar) v.findViewById(R.id.progressBar);
+        mNearestLoaderCallbacks = null;
         this.setHasOptionsMenu(true);
         return v;
     }
@@ -155,6 +166,8 @@ public class MapFragment extends Fragment {
     public void onResume() {
         Log.d(TAG, "onResume");
         super.onResume();
+
+        mHandler = new Handler();
 
         // 地図データにアクセスできる時だけ表示
         if (PermissionUtil.checkPermissionGranted(this.getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
@@ -259,7 +272,14 @@ public class MapFragment extends Fragment {
         Log.d(TAG, "searchNearShelter");
           if (mLayerManager.getShelterManager() != null) {
             wasSearched = true;
+            setNearestLoaderCallbacks();
             getLoaderManager().restartLoader(NEAREST_LOADER_ID, null, mNearestLoaderCallbacks);
+        }
+    }
+
+    private void setNearestLoaderCallbacks() {
+        if (null == mNearestLoaderCallbacks) {
+            mNearestLoaderCallbacks = new NearestShelterLoaderCallbacks();
         }
     }
 
@@ -342,6 +362,18 @@ public class MapFragment extends Fragment {
 
             mLayerManager.setShelters(shelters);
             mLayerManager.updateShelterMarker(mSearchTargetShelterType);
+
+
+            // 一定時間後、最新のオフラインマップがあるか確認処理を呼び出す
+            mHandler.postDelayed(new Runnable(){
+                @Override
+                public void run() {
+                    checkOfflineMap();
+                }
+            }, DELAY_CHECK_UPDATE);
+
+            // Loader の破棄
+            MapFragment.this.getLoaderManager().destroyLoader(SHELTER_LOADER_ID);
         }
         @Override
         public void onLoaderReset(Loader<Cursor> loader) {
@@ -383,4 +415,103 @@ public class MapFragment extends Fragment {
         }
     }
 
+    // オフラインマップ更新チェック
+    private void checkOfflineMap() {
+        Log.d(TAG, "checkOfflineMap");
+        this.getLoaderManager().initLoader(CHECK_UPDATE_LOADER_ID, null, new OfflineMapCheckerLoaderCallbacks());
+    }
+
+    private class OfflineMapCheckerLoaderCallbacks implements LoaderManager.LoaderCallbacks<Boolean> {
+        private final String TAG = OfflineMapCheckerLoaderCallbacks.class.getSimpleName();
+        @Override
+        public Loader<Boolean> onCreateLoader(int i, Bundle bundle) {
+            Log.d(TAG, "onCreateLoader");
+            return new OfflineMapCheckerAsyncTaskLoader(MapFragment.this.getActivity());
+        }
+        @Override
+        public void onLoadFinished(Loader<Boolean> loader, Boolean aBoolean) {
+            Log.d(TAG, "オフラインマップcheck: " + aBoolean);
+            if (aBoolean) {
+                // onLoadFinished からは直接 DialogFragment 表示ができない
+                // いったん、handler 経由にして、呼び出し側でActivityの状態をチェックする
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        confirmUserUpdateOrNot();
+                    }
+                });
+            }
+            MapFragment.this.getLoaderManager().destroyLoader(CHECK_UPDATE_LOADER_ID);
+        }
+        @Override
+        public void onLoaderReset(Loader<Boolean> loader) {
+        }
+    }
+
+    private void confirmUserUpdateOrNot() {
+
+        if (! this.getActivity().isFinishing() && ! this.getActivity().isDestroyed()) {
+            DialogFragment f = UpdateConfirmationDialogFragment.getInstance(MapFragment.this);
+            showDialog(f, FRAGMENT_TAG_DIALOG_UPDATE);
+        } else {
+            Log.w(TAG, "activity is on finishing or destroyed. so update confirmation dialog skipped.");
+        };
+
+    }
+
+    // UpdateConfirmationDialogFragment のListener
+
+    @Override
+    public void onOkClickListener() {
+        updateOfflineMap();
+    }
+    @Override
+    public void onCancelListener() {
+        // なにもしない
+        Log.d(TAG, "onCancelListener");
+    }
+
+    /**
+     * オフラインマップ更新
+     */
+    private void updateOfflineMap() {
+        Log.d(TAG, "updateOfflineMap");
+        // オフラインマップ更新
+        this.getLoaderManager().initLoader(UPDATE_LOADER_ID, null, new OfflineMapDownLoaderLoaderCallbacks());
+    }
+
+    private class OfflineMapDownLoaderLoaderCallbacks implements LoaderManager.LoaderCallbacks<Boolean> {
+        private final String TAG = OfflineMapDownLoaderLoaderCallbacks.class.getSimpleName();
+        @Override
+        public Loader<Boolean> onCreateLoader(int i, Bundle bundle) {
+            Log.d(TAG, "onCreateLoader");
+            return new OfflineMapDownLoaderAsyncTaskLoader(MapFragment.this.getActivity());
+        }
+        @Override
+        public void onLoadFinished(Loader<Boolean> loader, Boolean aBoolean) {
+            if (aBoolean) {
+                Toast.makeText(MapFragment.this.getContext(), "オフラインマップ更新に成功しました。再起動します。", Toast.LENGTH_LONG).show();
+                // アプリを再起動
+                if (MapFragment.this.getActivity() instanceof MainActivity) {
+
+                    destroyAllLoaders();
+                    ((MainActivity)MapFragment.this.getActivity()).restart();
+                }
+
+            } else {
+                Toast.makeText(MapFragment.this.getContext(), "更新失敗", Toast.LENGTH_LONG).show();
+            }
+            MapFragment.this.getLoaderManager().destroyLoader(UPDATE_LOADER_ID);
+        }
+        @Override
+        public void onLoaderReset(Loader<Boolean> loader) {
+        }
+    }
+
+    private void destroyAllLoaders() {
+        MapFragment.this.getLoaderManager().destroyLoader(SHELTER_LOADER_ID);
+        MapFragment.this.getLoaderManager().destroyLoader(NEAREST_LOADER_ID);
+        MapFragment.this.getLoaderManager().destroyLoader(CHECK_UPDATE_LOADER_ID);
+        MapFragment.this.getLoaderManager().destroyLoader(UPDATE_LOADER_ID);
+    }
 }

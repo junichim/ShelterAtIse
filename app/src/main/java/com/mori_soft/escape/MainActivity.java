@@ -16,6 +16,9 @@
 package com.mori_soft.escape;
 
 import android.Manifest;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
@@ -62,10 +65,11 @@ public class MainActivity extends AppCompatActivity {
     private static final int LOCATION_INTERVAL = 10 * SEC2MSEC;         // ミリ秒単位
     private static final int FASTEST_LOCATION_INTERVAL = 5 * SEC2MSEC; // ミリ秒単位
 
+    private static final int RESTART_DELAY = 2000; // アプリ再起動時の時間 (ms)
+
 
     private boolean mIsLocationAvailable;
     private FusedLocationProviderClient mFusedLocationClient;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -273,4 +277,13 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    public void restart() {
+        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+        PendingIntent pending = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+
+        AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        am.set(AlarmManager.RTC, System.currentTimeMillis() + RESTART_DELAY, pending);
+
+        finish();
+    }
 }
