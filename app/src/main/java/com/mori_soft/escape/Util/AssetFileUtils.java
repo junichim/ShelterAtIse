@@ -35,6 +35,8 @@ public class AssetFileUtils {
     private static final String TAG = AssetFileUtils.class.getSimpleName();
 
     public static boolean copyFromAsset(Context context, String filename_in_asset, String output_fullname) {
+        Log.d(TAG, "copyFromAsset : " + filename_in_asset);
+
         AssetManager am = context.getAssets();
         BufferedInputStream bis = null;
         BufferedOutputStream bos = null;
