@@ -48,7 +48,8 @@ public class MapViewSetupper {
     private static final double INIT_LAT = 34.491297; // 伊勢市駅
     private static final double INIT_LON = 136.709685;
 
-    private final static String MAP_FILE = "ise.map";
+    public final static String MAP_FILE = "ise.map";
+    public final static String MAP_TIMESTAMP = "map_timestamp";
 
     public static void setupMapView(Context context, MapView mapView) {
         setMapView(mapView);
@@ -87,17 +88,33 @@ public class MapViewSetupper {
     private static String getOfflineMapFile(Context context) {
         return new File(context.getExternalFilesDir(null),  "/" + MAP_FILE).getAbsolutePath();
     }
+    private static String getOfflineMapTimestampFile(Context context) {
+        return new File(context.getExternalFilesDir(null),  "/" + MAP_TIMESTAMP).getAbsolutePath();
+    }
 
+    /**
+     * map ファイルの準備
+     *
+     * .map と map_timestamp の２ファイルを利用可能とする
+     * @param context
+     * @return
+     */
     public static boolean prepareOfflineMapFile(Context context) {
-        File mf = new File(getOfflineMapFile(context));
+        Log.d(TAG, "prepareOfflineMapFile");
+        return prepareOfflineFile(context, MAP_FILE, getOfflineMapFile(context)) &&
+                prepareOfflineFile(context, MAP_TIMESTAMP, getOfflineMapTimestampFile(context));
+    }
 
-        // フォルダ名 or フォルダ名.ghz の存在確認
-        if (mf.exists() && mf.isFile()) {
+    private static boolean prepareOfflineFile(Context context, String fnInAsset, String dstFn) {
+        File dst = new File(dstFn);
+
+        // ファイルの存在確認
+        if (dst.exists() && dst.isFile()) {
             // 準備完了
+            Log.d(TAG, "already map file exists : " + dstFn);
             return true;
         }
 
-        return AssetFileUtils.copyFromAsset(context, MAP_FILE, mf.getAbsolutePath());
+        return AssetFileUtils.copyFromAsset(context, fnInAsset, dst.getAbsolutePath());
     }
-
 }
