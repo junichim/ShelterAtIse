@@ -16,29 +16,21 @@
 package com.mori_soft.escape.model;
 
 import android.content.Context;
-import android.content.res.AssetManager;
 import android.util.Log;
 
 import com.graphhopper.GraphHopper;
 import com.mori_soft.escape.Util.AssetFileUtils;
 import com.mori_soft.escape.Util.FileUtil;
-import com.mori_soft.escape.entity.ShelterEntity;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 
 public class GraphHopperWrapper {
 
     private static final String TAG = GraphHopperWrapper.class.getSimpleName();
-    private static final String GHZ_COMPRESSED_FILE = "ise"; // real filename is ise.ghz
-    private static final String SUFX_GHZ = ".ghz";
+
+    public static final String GHZ_FILE_BASE = "ise"; // real filename is ise.ghz
+    public static final String SUFX_GHZ = ".ghz";
+    public static final String GHZ_FILE = GHZ_FILE_BASE + SUFX_GHZ;
 
     private static GraphHopper mGraphHopper;
 
@@ -76,7 +68,7 @@ public class GraphHopperWrapper {
     private static String getGraphHopperFolder(Context context) {
         // 外部ストレージ領域にあるパッケージ用のフォルダ（アンインストールで消える）を利用する
         // 例 /sdcard/Android/data/パッケージ名/files になる
-        return new File(context.getExternalFilesDir(null),  "/" + GHZ_COMPRESSED_FILE).getAbsolutePath();
+        return new File(context.getExternalFilesDir(null),  "/" + GHZ_FILE_BASE).getAbsolutePath();
     }
 
     public static boolean prepareGraphHopperFile(Context context) {
@@ -87,10 +79,11 @@ public class GraphHopperWrapper {
         // フォルダ名 or フォルダ名.ghz の存在確認
         if (gh.exists() && gh.isDirectory() || ghz.exists() && ghz.isFile()) {
             // 準備完了
+            Log.d(TAG, "already ghz file exists : " + ghz);
             return true;
         }
 
-        return AssetFileUtils.copyFromAsset(context, GHZ_COMPRESSED_FILE + SUFX_GHZ, ghz.getAbsolutePath());
+        return AssetFileUtils.copyFromAsset(context, GHZ_FILE, ghz.getAbsolutePath());
     }
 
     private static void clearGhzFiles(Context context) {
@@ -100,6 +93,39 @@ public class GraphHopperWrapper {
 
         FileUtil.forceDelete(gh);
         FileUtil.forceDelete(ghz);
+    }
+
+    /**
+     * 引数で指定される ghzBasename ファイルがライブラリで扱えるか否かチェック
+     *
+     * 実際に読み込んでみて、例外がなければOKとする。
+     *
+     * 注意
+     *   指定された ghzファイルを実際に解凍してチェックする。
+     *   このため、ghzファイルのbasenameのフォルダが作成されるが、
+     *   終了時には消去する。
+     *   このため、もし、basenameと同名フォルダが存在していた場合は、
+     *   消去されるので注意すること
+     *
+     * @param ghzBasename  テスト対象ファイルの絶対パス（拡張子なし）
+     * @return  true: 妥当なファイル（読み込み可能）, false: 不正なファイル（読み込み不可能）
+     */
+    public static boolean isValidGhzFile(String ghzBasename) {
+        Log.d(TAG, "isValidGhzFile. check for " + ghzBasename);
+        try {
+            GraphHopper tmp = new GraphHopper().forMobile();
+            tmp.load(ghzBasename);
+            tmp.close();
+            tmp = null;
+            return true;
+        } catch (Exception e) {
+            Log.w(TAG, "isValidGhzFile: Graphhopper file load failed" , e);
+            return false;
+        } finally {
+            // 消去
+            FileUtil.forceDelete(new File(ghzBasename));
+            FileUtil.forceDelete(new File(ghzBasename + SUFX_GHZ));
+        }
     }
 
 }
