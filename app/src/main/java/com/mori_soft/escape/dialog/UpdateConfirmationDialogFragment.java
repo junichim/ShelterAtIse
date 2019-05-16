@@ -13,7 +13,6 @@ public class UpdateConfirmationDialogFragment extends DialogFragment {
 
     public interface onUpdateListener {
         void onOkClickListener();
-        void onCancelListener();
     }
 
     private static final int FRAGMENT_TARGET = 1;
@@ -39,14 +38,7 @@ public class UpdateConfirmationDialogFragment extends DialogFragment {
                         }
                    }
                })
-               .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                   @Override
-                   public void onClick(DialogInterface dialogInterface, int i) {
-                       if (null != mListener) {
-                           mListener.onCancelListener();
-                       }
-                   }
-               });
+               .setNegativeButton(android.R.string.cancel, null);
 
         return builder.show();
     }

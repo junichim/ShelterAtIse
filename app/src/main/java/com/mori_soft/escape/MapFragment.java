@@ -475,11 +475,6 @@ public class MapFragment extends Fragment implements UpdateConfirmationDialogFra
     public void onOkClickListener() {
         updateOfflineMap();
     }
-    @Override
-    public void onCancelListener() {
-        // なにもしない
-        Log.d(TAG, "onCancelListener");
-    }
 
     /**
      * オフラインマップ更新
