@@ -26,6 +26,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.mori_soft.escape.R;
+import com.mori_soft.escape.Util.VersionUtil;
 
 /**
  * 『このアプリについて』ダイアログ.
@@ -37,7 +38,7 @@ public class AboutDialogFragment extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        builder.setTitle(R.string.about);
+        builder.setTitle(getContext().getResources().getString(R.string.app_name) + ", " + VersionUtil.getVersionName(getContext()));
 
         View v = getActivity().getLayoutInflater().inflate(R.layout.dialog_about, null);
 

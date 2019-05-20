@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">避難所検索＠伊勢市</string>
+    <string name="app_name">避難所検索＠伊勢</string>
 
     <string-array name="shelter_type" >
         <item>津波緊急避難所</item>
