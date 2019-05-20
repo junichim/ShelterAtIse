@@ -26,7 +26,7 @@ class Timestamp {
 
     private static final String TAG = Timestamp.class.getSimpleName();
 
-    private static final String DATE_FMT = "yyyy-MM-dd'T'hh:mm:ssX";
+    private static final String DATE_FMT = "yyyy-MM-dd'T'hh:mm:ssZ";
     private static final SimpleDateFormat mSdf = new SimpleDateFormat(DATE_FMT);
 
     private final Date mTimestampDate;
@@ -71,6 +71,7 @@ class Timestamp {
             ts = br.readLine();
             dt = mSdf.parse(ts);
 
+            Log.d(TAG, "タイムスタンプ : " + dt.toString() + ", for " + fn);
             br.close();
 
         } catch (FileNotFoundException e) {
