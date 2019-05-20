@@ -5,6 +5,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
+    <fragment
+        android:id="@+id/fragment_map"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:name="com.mori_soft.escape.MapFragment" />
+
     <android.support.design.widget.AppBarLayout
         android:id="@+id/app_bar"
         android:layout_width="match_parent"
@@ -22,11 +28,5 @@
         </android.support.v7.widget.Toolbar>
 
     </android.support.design.widget.AppBarLayout>
-
-    <fragment
-        android:id="@+id/fragment_map"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:name="com.mori_soft.escape.MapFragment" />
 
 </android.support.design.widget.CoordinatorLayout>
