@@ -128,7 +128,7 @@ public class MapFragment extends Fragment implements UpdateConfirmationDialogFra
 
         Spinner spinner = (Spinner) ab.getCustomView().findViewById(R.id.action_spinner);
         ArrayAdapter adapter = ArrayAdapter.createFromResource(this.getActivity(), R.array.shelter_type, R.layout.spinner_dropdown);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
         spinner.setAdapter(adapter);
 
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
