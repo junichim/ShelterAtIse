@@ -40,6 +40,7 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.mori_soft.escape.Util.ConnectionUtil;
 import com.mori_soft.escape.Util.LocationUtil;
 import com.mori_soft.escape.Util.PermissionUtil;
 import com.mori_soft.escape.dialog.AboutDialogFragment;
@@ -428,7 +429,14 @@ public class MapFragment extends Fragment implements UpdateConfirmationDialogFra
     // オフラインマップ更新チェック
     private void checkOfflineMap() {
         Log.d(TAG, "checkOfflineMap");
-        this.getLoaderManager().initLoader(CHECK_UPDATE_LOADER_ID, null, new OfflineMapCheckerLoaderCallbacks());
+
+        // WiFi 接続時の判定
+        if (ConnectionUtil.isWiFiConnected(getContext())) {
+            Log.d(TAG, "WiFi connected. start check offline map update");
+            this.getLoaderManager().initLoader(CHECK_UPDATE_LOADER_ID, null, new OfflineMapCheckerLoaderCallbacks());
+        } else {
+            Log.d(TAG, "WiFi disconnected. skip offline map update");
+        }
     }
 
     private class OfflineMapCheckerLoaderCallbacks implements LoaderManager.LoaderCallbacks<Boolean> {
