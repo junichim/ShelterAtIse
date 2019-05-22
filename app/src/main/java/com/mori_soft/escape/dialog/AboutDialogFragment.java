@@ -33,8 +33,27 @@ import com.mori_soft.escape.Util.VersionUtil;
  */
 
 public class AboutDialogFragment extends DialogFragment {
-    private static final int[] RES_IDS = {R.id.about_license_me, R.id.about_license_mapsforge, R.id.about_license_graphhopper, R.id.about_license_shelter, R.id.about_license_osm, R.id.about_license_icon};
-    private static final int[] RES_STRINGS = {R.string.about_license_me, R.string.about_license_mapsforge, R.string.about_license_graphhopper, R.string.about_license_shelter, R.string.about_license_osm, R.string.about_license_icon};
+    private static final int[] RES_IDS = {
+            R.id.about_license_me,
+            R.id.about_project,
+            R.id.about_license_mapsforge,
+            R.id.about_license_graphhopper,
+            R.id.about_license_shelter,
+            R.id.about_license_osm,
+            R.id.about_license_icon,
+            R.id.about_license_fukidashi
+    };
+    private static final int[] RES_STRINGS = {
+            R.string.about_license_me,
+            R.string.about_project,
+            R.string.about_license_mapsforge,
+            R.string.about_license_graphhopper,
+            R.string.about_license_shelter,
+            R.string.about_license_osm,
+            R.string.about_license_icon,
+            R.string.about_license_fukidashi
+    };
+
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());

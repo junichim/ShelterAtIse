@@ -12,14 +12,22 @@
             android:text="@string/about_license_me"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/about_license_me"
-            android:scrollbars="vertical" />
+            android:id="@+id/about_license_me" />
 
         <TextView
-            android:text="@string/about_license_caution"
+            android:text="@string/about_project"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:scrollbars="vertical" />
+            android:id="@+id/about_project"
+            android:layout_marginLeft="30dp"
+            android:layout_marginTop="10dp" />
+
+        <TextView
+            android:text="@string/about_caution"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="30dp"
+            android:layout_marginTop="10dp" />
 
         <TextView
             android:text="@string/about_license_opensorce"
@@ -32,7 +40,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/about_license_mapsforge"
-            android:layout_marginLeft="10dp"
+            android:layout_marginLeft="30dp"
             android:layout_marginTop="10dp" />
 
         <TextView
@@ -40,7 +48,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/about_license_graphhopper"
-            android:layout_marginLeft="10dp"
+            android:layout_marginLeft="30dp"
             android:layout_marginTop="10dp" />
 
         <TextView
@@ -54,7 +62,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/about_license_shelter"
-            android:layout_marginLeft="10dp"
+            android:layout_marginLeft="30dp"
             android:layout_marginTop="10dp" />
 
         <TextView
@@ -62,7 +70,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/about_license_osm"
-            android:layout_marginLeft="10dp"
+            android:layout_marginLeft="30dp"
             android:layout_marginTop="10dp" />
 
         <TextView
@@ -70,6 +78,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/about_license_icon"
+            android:layout_marginTop="10dp" />
+
+        <TextView
+            android:text="@string/about_license_fukidashi"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/about_license_fukidashi"
             android:layout_marginTop="10dp" />
     </LinearLayout>
 </ScrollView>
