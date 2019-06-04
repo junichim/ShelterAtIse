@@ -47,6 +47,7 @@ import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.mori_soft.escape.Util.PermissionUtil;
+import com.mori_soft.escape.model.GraphHopperWrapper;
 
 import org.mapsforge.core.model.LatLong;
 
@@ -283,6 +284,9 @@ public class MainActivity extends AppCompatActivity {
 
         AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         am.set(AlarmManager.RTC, System.currentTimeMillis() + RESTART_DELAY, pending);
+
+        // 再起動時は GraphHopper をいったん開放しておく
+        GraphHopperWrapper.releaseGraphHopper();
 
         finish();
     }

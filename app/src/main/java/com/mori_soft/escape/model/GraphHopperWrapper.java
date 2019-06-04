@@ -128,4 +128,10 @@ public class GraphHopperWrapper {
         }
     }
 
+    public static void releaseGraphHopper() {
+        if (mGraphHopper != null) {
+            mGraphHopper.close();
+            mGraphHopper = null;
+        }
+    }
 }
