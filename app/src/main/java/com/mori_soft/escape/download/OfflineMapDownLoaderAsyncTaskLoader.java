@@ -37,6 +37,9 @@ public class OfflineMapDownLoaderAsyncTaskLoader extends AsyncTaskLoader<Boolean
 
         if (false == downloadAndCheckOffilneMap()) {
             Log.w(TAG, "オフラインマップの更新準備に失敗しました。更新処理を中止します。");
+
+            // ダウンロード済みファイルの削除
+            deleteDownloadedFiles();
             return false;
         }
 
@@ -53,15 +56,17 @@ public class OfflineMapDownLoaderAsyncTaskLoader extends AsyncTaskLoader<Boolean
             FileUtil.forceDelete(ts);
             FileUtil.forceDelete(new File(this.getContext().getExternalFilesDir(null) + "/" + GraphHopperWrapper.GHZ_FILE_BASE));
 
-            // オフラインマップファイルをコピー
+            // オフラインマップファイルを移動
             final String folder = DownLoader.getDownloadFolder(this.getContext());
 
-            FileUtil.copyFile(new File(folder + "/" + MapViewSetupper.MAP_FILE), map);
-            FileUtil.copyFile(new File(folder + "/" + GraphHopperWrapper.GHZ_FILE), ghz);
-            FileUtil.copyFile(new File(folder + "/" + tsFn), ts);
+            FileUtil.psudoMoveFile(new File(folder + "/" + MapViewSetupper.MAP_FILE), map);
+            FileUtil.psudoMoveFile(new File(folder + "/" + GraphHopperWrapper.GHZ_FILE), ghz);
+            FileUtil.psudoMoveFile(new File(folder + "/" + tsFn), ts);
         } catch (IOException e) {
             Log.w(TAG, "オフラインマップの更新に失敗しました。更新処理を中止します。", e);
             return false;
+        } finally {
+            deleteDownloadedFiles();
         }
         return true;
     }
@@ -69,7 +74,9 @@ public class OfflineMapDownLoaderAsyncTaskLoader extends AsyncTaskLoader<Boolean
     private boolean downloadAndCheckOffilneMap() {
 
         // ファイルのダウンロード
-        downloadOfflineMap();
+        if (false == downloadOfflineMap()) {
+            return false;
+        };
 
         // ghz ファイルのコピー
         final String folder = DownLoader.getDownloadFolder(this.getContext());
@@ -93,13 +100,24 @@ public class OfflineMapDownLoaderAsyncTaskLoader extends AsyncTaskLoader<Boolean
 
         // map ファイルのダウンロード
         if (! dl.downloadFromNetwork(MapViewSetupper.MAP_FILE)) {
+            Log.e(TAG, "ダウンロードに失敗しました: " + MapViewSetupper.MAP_FILE);
             return false;
         }
         // ghz ファイルのダウンロード
         if (! dl.downloadFromNetwork(GraphHopperWrapper.GHZ_FILE)) {
+            Log.e(TAG, "ダウンロードに失敗しました: " + GraphHopperWrapper.GHZ_FILE);
             return false;
         }
         return true;
+    }
+
+    private void deleteDownloadedFiles() {
+        final String folder = DownLoader.getDownloadFolder(this.getContext());
+        final File map = new File(folder + "/" + MapViewSetupper.MAP_FILE);
+        final File ghz = new File(folder + "/" + GraphHopperWrapper.GHZ_FILE);
+
+        FileUtil.forceDelete(map);
+        FileUtil.forceDelete(ghz);
     }
 
 }

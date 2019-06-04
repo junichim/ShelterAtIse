@@ -91,4 +91,18 @@ public class FileUtil {
         }
     }
 
+    /**
+     * ファイルを疑似的に移動する
+     *
+     * コピー後、コピー元ファイルを削除することで移動とする
+     *
+     * @param src  移動元ファイル
+     * @param dst  移動先ファイル
+     * @throws IOException
+     */
+    public static void psudoMoveFile(final File src, final File dst) throws IOException {
+        copyFile(src, dst);
+        forceDelete(src);
+    }
+
 }
