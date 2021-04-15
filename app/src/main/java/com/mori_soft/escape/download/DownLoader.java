@@ -20,7 +20,7 @@ class DownLoader {
 
     private static final String TAG = DownLoader.class.getSimpleName();
 
-    private static final String SERVER = "https://s3-ap-northeast-1.amazonaws.com/com.mori-soft.s3.public.escape/";
+    private static final String SERVER = "https://s3-ap-northeast-1.amazonaws.com/com.mori-soft.s3.public.escape/v1/";
     private static final String WORK_DIR = "download";
 
     private Context mContext;
