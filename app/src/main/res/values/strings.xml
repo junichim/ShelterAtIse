@@ -32,4 +32,12 @@
     <string name="about_license_icon">このアプリでは避難所位置を表すマーカーとして&lt;a href="https://sozai.cman.jp/"&gt;https://sozai.cman.jp/&lt;/a&gt;の画像を使用しています。</string>
     <string name="about_license_fukidashi">このアプリでは吹き出し画像として&lt;a href="http://fukidesign.com/"&gt;http://fukidesign.com/&lt;/a&gt;の画像を加工して使用しています。</string>
 
+    <string name="dialog_info_need_storage_permission_title">ストレージへの書き込み権限が必要</string>
+    <string name="dialog_info_need_storage_permission_abstract">オフライン地図の表示および経路検索処理で、ストレージへの書き込みを行うため、書き込み権限が必要です。</string>
+    <string name="dialog_info_need_storage_permission_detail">ストレージへの書き込み権限がない場合、オフライン地図を表示することができません。\nなお、あとから、スマートフォンの設定画面にて権限を変更可能です。</string>
+
+    <string name="dialog_info_need_location_permission_title">位置情報取得の権限が必要</string>
+    <string name="dialog_info_need_location_permission_abstract">現在位置の表示および最寄りの避難所までの経路検索を行うため、現在位置情報を取得する権限が必要です。</string>
+    <string name="dialog_info_need_location_permission_detail">現在位置情報取得の権限がない場合、現在位置から最寄りの避難所までの経路を検索することができません。\nなお、あとから、スマートフォンの設定画面にて権限を変更可能です。</string>
+
 </resources>

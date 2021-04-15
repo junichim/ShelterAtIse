@@ -25,6 +25,7 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.support.annotation.NonNull;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -47,6 +48,7 @@ import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.mori_soft.escape.Util.PermissionUtil;
+import com.mori_soft.escape.dialog.InfoDialogFragment;
 import com.mori_soft.escape.model.GraphHopperWrapper;
 
 import org.mapsforge.core.model.LatLong;
@@ -57,8 +59,9 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    private static final int PERMISSION_REQUEST_CODE_WRITE_STORAGE = 1;
-    private static final int PERMISSION_REQUEST_CODE_LOCATION = 2;
+    public static final int PERMISSION_REQUEST_CODE_WRITE_STORAGE = 1;
+    public static final int PERMISSION_REQUEST_CODE_LOCATION = 2;
+
     private static final int GOOGLEPLAYSERVICE_ERROR_DIALOG_CODE = 1;
     private static final int GOOGLEPLAYSERVICE_LOCATION_REQUST_CHECK_SETTING = 2;
 
@@ -146,15 +149,15 @@ public class MainActivity extends AppCompatActivity {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     checkGooglePlayService();
                 } else {
-                    // TODO 地図が表示できないことを説明
+                    Log.w(TAG, "ストレージの権限がありません");
                 }
                 break;
             case PERMISSION_REQUEST_CODE_LOCATION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     checkCurrentLocationSettings();
                 } else {
+                    Log.w(TAG, "位置情報の権限がありません");
                     mIsLocationAvailable = false;
-                    // TODO 現在位置を表示できないことを説明
                 }
                 break;
             default:
