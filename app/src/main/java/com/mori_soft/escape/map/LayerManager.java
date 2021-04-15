@@ -19,7 +19,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.util.Log;
 
-import com.graphhopper.PathWrapper;
+import com.graphhopper.ResponsePath;
 import com.mori_soft.escape.R;
 import com.mori_soft.escape.Util.MarkerUtils;
 import com.mori_soft.escape.entity.ShelterEntity;
@@ -227,7 +227,7 @@ public class LayerManager {
         }
     }
 
-    private Polyline createPolyline(PathWrapper response, LatLong start, LatLong end) {
+    private Polyline createPolyline(ResponsePath response, LatLong start, LatLong end) {
         Paint paintStroke = AndroidGraphicFactory.INSTANCE.createPaint();
         paintStroke.setStyle(Style.STROKE);
         paintStroke.setColor(Color.argb(128, 0, 0xCC, 0x33));

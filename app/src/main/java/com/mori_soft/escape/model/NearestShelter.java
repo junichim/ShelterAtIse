@@ -22,7 +22,7 @@ import android.util.Pair;
 import com.graphhopper.GHRequest;
 import com.graphhopper.GHResponse;
 import com.graphhopper.GraphHopper;
-import com.graphhopper.PathWrapper;
+import com.graphhopper.ResponsePath;
 import com.graphhopper.util.Parameters;
 import com.mori_soft.escape.Util.LocationUtil;
 import com.mori_soft.escape.entity.ShelterEntity;
@@ -66,13 +66,13 @@ public class NearestShelter {
     public static class ShelterPath {
         public static final int INVALID_DIST = -1;
         public ShelterEntity shelter;
-        public PathWrapper path;
+        public ResponsePath path;
         public double dist;
         public LatLong startPoint;
 
-        public ShelterPath(ShelterEntity shlt, PathWrapper pathWrapper, double distance, LatLong start) {
+        public ShelterPath(ShelterEntity shlt, ResponsePath responsePath, double distance, LatLong start) {
             shelter = shlt;
-            path = pathWrapper;
+            path = responsePath;
             dist = distance;
             startPoint = start;
         }
@@ -109,7 +109,7 @@ public class NearestShelter {
         List<ShelterPath> pathsNonTarget = new ArrayList<ShelterPath>();
 
         for (ShelterEntity shlt : shelters) {
-            PathWrapper path = calcPath(current.getLatitude(), current.getLongitude(), shlt.lat, shlt.lon);
+            ResponsePath path = calcPath(current.getLatitude(), current.getLongitude(), shlt.lat, shlt.lon);
             if (shelterType == ShelterType.TSUNAMI && shlt.isTsunami || shelterType == ShelterType.DESIGNATION && shlt.isShelter) {
                 addPathResult(pathsTarget, shlt, path, current);
             } else {
@@ -124,10 +124,10 @@ public class NearestShelter {
         return paths;
     }
 
-    private PathWrapper calcPath(double lat1, double lon1, double lat2, double lon2) {
+    private ResponsePath calcPath(double lat1, double lon1, double lat2, double lon2) {
 
-        GHRequest req = new GHRequest(lat1, lon1, lat2, lon2).setAlgorithm(Parameters.Algorithms.DIJKSTRA_BI); // TODO アルゴリズム
-        req.getHints().put(Parameters.Routing.INSTRUCTIONS, "false");
+        GHRequest req = new GHRequest(lat1, lon1, lat2, lon2).setProfile(GraphHopperWrapper.GH_PROFILE);
+        req.getHints().putObject(Parameters.Routing.INSTRUCTIONS, "false");
 
         if (null == mGraphHopper) {
             return null;
@@ -140,7 +140,7 @@ public class NearestShelter {
                 Log.w(TAG, "error: ", th);
             return null;
         }
-        PathWrapper path = res.getBest();
+        ResponsePath path = res.getBest();
         if (path != null) {
             if (!path.hasErrors()) {
                 return path;
@@ -152,11 +152,11 @@ public class NearestShelter {
         return null;
     }
 
-    private void addPathResult(List<ShelterPath> lst, ShelterEntity shlt, PathWrapper pathWrapper, LatLong current) {
-        if (pathWrapper == null) {
+    private void addPathResult(List<ShelterPath> lst, ShelterEntity shlt, ResponsePath responsePath, LatLong current) {
+        if (responsePath == null) {
             lst.add(new ShelterPath(shlt, null, ShelterPath.INVALID_DIST, current));
         } else {
-            lst.add(new ShelterPath(shlt, pathWrapper, pathWrapper.getDistance(), current));
+            lst.add(new ShelterPath(shlt, responsePath, responsePath.getDistance(), current));
         }
 
     }

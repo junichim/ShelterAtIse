@@ -19,6 +19,8 @@ import android.content.Context;
 import android.util.Log;
 
 import com.graphhopper.GraphHopper;
+import com.graphhopper.config.CHProfile;
+import com.graphhopper.config.Profile;
 import com.mori_soft.escape.Util.AssetFileUtils;
 import com.mori_soft.escape.Util.FileUtil;
 
@@ -31,6 +33,12 @@ public class GraphHopperWrapper {
     public static final String GHZ_FILE_BASE = "ise"; // real filename is ise.ghz
     public static final String SUFX_GHZ = ".ghz";
     public static final String GHZ_FILE = GHZ_FILE_BASE + SUFX_GHZ;
+
+    // graphhopper ファイルを作成した際に config.yaml で指定した情報
+    //   ファイルから読み込んだだけでは設定されない
+    public static final String GH_PROFILE = "escape_by_foot";
+    private static final String GH_PROFILE_VEHICLE = "foot";
+    private static final String GH_PROFILE_WEIGHTING = "fastest";
 
     private static GraphHopper mGraphHopper;
 
@@ -55,6 +63,8 @@ public class GraphHopperWrapper {
         Log.d(TAG, "prepareGraphHopper");
         try {
             GraphHopper tmp = new GraphHopper().forMobile();
+            tmp.setProfiles(new Profile(GH_PROFILE).setVehicle(GH_PROFILE_VEHICLE).setWeighting(GH_PROFILE_WEIGHTING));
+            tmp.getCHPreparationHandler().setCHProfiles(new CHProfile(GH_PROFILE));
             tmp.load(getGraphHopperFolder(context));
             return tmp;
         } catch (Exception e) {
