@@ -17,23 +17,13 @@ package com.mori_soft.escape.dialog;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
-import android.text.method.ScrollingMovementMethod;
-import android.view.LayoutInflater;
+
+import androidx.fragment.app.DialogFragment;
+
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.ListView;
-import android.widget.TextView;
 
 import com.mori_soft.escape.R;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 『使い方』ダイアログ.

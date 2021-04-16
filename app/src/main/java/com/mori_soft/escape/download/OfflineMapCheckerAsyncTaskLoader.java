@@ -1,8 +1,7 @@
 package com.mori_soft.escape.download;
 
 import android.content.Context;
-import android.support.v4.content.AsyncTaskLoader;
-import android.util.Log;
+import androidx.loader.content.AsyncTaskLoader;
 
 import com.mori_soft.escape.map.MapViewSetupper;
 

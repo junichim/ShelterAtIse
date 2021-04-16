@@ -16,8 +16,8 @@
 package com.mori_soft.escape.model;
 
 import android.content.Context;
-import android.os.AsyncTask;
-import android.support.v4.content.AsyncTaskLoader;
+
+import androidx.loader.content.AsyncTaskLoader;
 import android.util.Log;
 
 import com.graphhopper.GraphHopper;
@@ -25,7 +25,6 @@ import com.mori_soft.escape.entity.ShelterEntity;
 
 import org.mapsforge.core.model.LatLong;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.List;
 
