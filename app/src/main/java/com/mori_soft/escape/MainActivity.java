@@ -25,7 +25,6 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.support.annotation.NonNull;
-import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -48,7 +47,6 @@ import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.mori_soft.escape.Util.PermissionUtil;
-import com.mori_soft.escape.dialog.InfoDialogFragment;
 import com.mori_soft.escape.model.GraphHopperWrapper;
 
 import org.mapsforge.core.model.LatLong;
@@ -253,7 +251,7 @@ public class MainActivity extends AppCompatActivity {
 
                 if (location != null) {
                     MapFragment f = (MapFragment) MainActivity.this.getSupportFragmentManager().findFragmentById(R.id.fragment_map);
-                    f.updateLastLocation(new LatLong(location.getLatitude(), location.getLongitude()));
+                    f.updateLocationAndSetCenter(new LatLong(location.getLatitude(), location.getLongitude()));
                 }
 
                 startLocationUpdate();

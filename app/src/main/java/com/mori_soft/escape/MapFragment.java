@@ -261,19 +261,31 @@ public class MapFragment extends Fragment implements UpdateConfirmationDialogFra
         mLayerManager.updateShelterMarker(mSearchTargetShelterType);
     }
 
-    public void updateLastLocation(LatLong loc) {
+    /**
+     * 現在位置マーカーを更新し、地図の中心を現在位置に合わせる
+     * @param loc
+     */
+    public void updateLocationAndSetCenter(LatLong loc) {
         mLayerManager.updateCurrentMarker(loc);
         if (LocationUtil.isInTargetArea(loc)) {
             mMapView.setCenter(loc);
         }
     }
+
+    /**
+     * 現在位置マーカーを更新する
+     *
+     * 検索済みフラグ (wasSearched フラグ) が false であれば、
+     * 最寄りの避難所までの経路も検索する
+     * @param loc
+     */
     public void updateCurrentLocation(LatLong loc) {
         Log.d(TAG, "updateCurrentLocation");
         mLayerManager.updateCurrentMarker(loc);
 
         // 近傍の避難所探索
         if (LocationUtil.isInTargetArea(loc)) {
-            Log.d(TAG, "waSearched: " + wasSearched);
+            Log.d(TAG, "wasSearched: " + wasSearched);
             if (!wasSearched) {
                 searchNearShelter();
             }
