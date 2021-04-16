@@ -222,6 +222,14 @@ public class MapFragment extends Fragment implements UpdateConfirmationDialogFra
                 dialog = new UsageDialogFragment();
                 showDialog(dialog, FRAGMENT_TAG_DIALOG_USAGE);
                 return true;
+            case R.id.action_check_update:
+                if (ConnectionUtil.isWiFiConnected(getContext())) {
+                    Toast.makeText(this.getActivity(), "オフラインマップデータの更新があるか確認します。", Toast.LENGTH_SHORT).show();
+                    checkOfflineMap();
+                } else {
+                    Toast.makeText(this.getActivity(), "データの更新は WiFi 接続時のみ可能です。", Toast.LENGTH_SHORT).show();
+                }
+                return true;
             case R.id.action_about:
                 dialog = new AboutDialogFragment();
                 showDialog(dialog, FRAGMENT_TAG_DIALOG_ABOUT);
