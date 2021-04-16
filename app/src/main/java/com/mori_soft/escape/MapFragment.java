@@ -153,6 +153,7 @@ public class MapFragment extends Fragment implements UpdateConfirmationDialogFra
                     mLayerManager.updateShelterMarker(mSearchTargetShelterType);
                     // 現在位置を取得したら更新
                     if (mLayerManager.getCurrentLocation() != null) {
+                        updateLocationAndSetCenter(mLayerManager.getCurrentLocation());
                         mProgressBar.setVisibility(View.VISIBLE);
                         wasSearched = false;
                     }
@@ -206,6 +207,7 @@ public class MapFragment extends Fragment implements UpdateConfirmationDialogFra
         switch (item.getItemId()) {
             case R.id.action_search:
                 if (mLayerManager.getCurrentLocation() != null) {
+                    updateLocationAndSetCenter(mLayerManager.getCurrentLocation());
                     if (! isSearching()) {
                         Toast.makeText(this.getActivity(), "現在地の最寄りの避難所を検索します。", Toast.LENGTH_SHORT).show();
                         searchNearShelter();
