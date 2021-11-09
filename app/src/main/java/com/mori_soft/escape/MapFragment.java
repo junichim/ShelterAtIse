@@ -529,6 +529,12 @@ public class MapFragment extends Fragment implements
     public void onOkClickMap() {
         updateOfflineMap();
     }
+    @Override
+    public void onCancelClickMap() {
+        // 引き続き、避難所ファイルの更新を確認する
+        Log.d(TAG, "onCancelClickMap, 避難所ファイルの更新をチェックします");
+        checkShelter();
+    }
 
     /**
      * オフラインマップ更新

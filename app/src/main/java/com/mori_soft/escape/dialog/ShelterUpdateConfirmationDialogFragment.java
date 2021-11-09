@@ -37,6 +37,9 @@ public class ShelterUpdateConfirmationDialogFragment extends UpdateConfirmationD
             mListener.onOkClickShelter();
         }
     }
+    @Override
+    protected void onCancelClick() {
+    }
 
     @Override
     public void onAttach(Context context) {

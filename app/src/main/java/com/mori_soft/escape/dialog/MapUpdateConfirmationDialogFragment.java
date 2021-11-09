@@ -8,6 +8,7 @@ public class MapUpdateConfirmationDialogFragment extends UpdateConfirmationDialo
 
     public interface onUpdateListener {
         void onOkClickMap();
+        void onCancelClickMap();
     }
 
     private static final int FRAGMENT_TARGET = 1;
@@ -34,6 +35,12 @@ public class MapUpdateConfirmationDialogFragment extends UpdateConfirmationDialo
     protected void onOkClick() {
         if (null != mListener) {
             mListener.onOkClickMap();
+        }
+    }
+    @Override
+    protected void onCancelClick() {
+        if (null != mListener) {
+            mListener.onCancelClickMap();
         }
     }
 

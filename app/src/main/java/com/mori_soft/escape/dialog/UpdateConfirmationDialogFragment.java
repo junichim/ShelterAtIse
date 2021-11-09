@@ -14,6 +14,7 @@ abstract public class UpdateConfirmationDialogFragment extends DialogFragment {
     abstract protected String getTitle();
     abstract protected String getMessage();
     abstract protected void onOkClick();
+    abstract protected void onCancelClick();
 
     @NonNull
     @Override
@@ -27,7 +28,12 @@ abstract public class UpdateConfirmationDialogFragment extends DialogFragment {
                        onOkClick();
                    }
                })
-               .setNegativeButton(android.R.string.cancel, null);
+               .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                   @Override
+                   public void onClick(DialogInterface dialogInterface, int i) {
+                       onCancelClick();
+                   }
+               });
 
         return builder.show();
     }
