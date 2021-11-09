@@ -650,7 +650,12 @@ public class MapFragment extends Fragment implements
                     Log.w(TAG, "避難所データ更新でエラーが発生しました。更新処理を中断します。", e);
                     Toast.makeText(MapFragment.this.getContext(), "避難所ファイル更新時にエラーが発生しました。更新処理を中断します。", Toast.LENGTH_LONG).show();
 
-                    // TODO 巻き戻しするか？
+                    try {
+                        ShelterUpdater.rollbackShelterFiles(MapFragment.this.getContext());
+                    } catch(Exception ex) {
+                        Log.w(TAG, "ロールバックに失敗しました。", ex);
+                        Toast.makeText(MapFragment.this.getContext(), "避難所データの復元に失敗しました。データをクリアして再起動してください。", Toast.LENGTH_LONG).show();
+                    }
 
                     MapFragment.this.getLoaderManager().destroyLoader(UPDATE_SHELTER_LOADER_ID);
                     return;

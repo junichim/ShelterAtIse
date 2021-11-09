@@ -48,14 +48,20 @@ public class OfflineShelterDownLoaderAsyncTaskLoader extends AsyncTaskLoader<Boo
         // 避難所ファイルの更新
         try {
             final File shelter = new File(this.getContext().getExternalFilesDir(null) + "/" + ShelterUpdater.SHELTER_FILE);
+            final File shelter_bak = new File(this.getContext().getExternalFilesDir(null) + "/" + ShelterUpdater.BAK_SHELTER_FILE);
             final String tsFn = ShelterUpdater.SHELTER_TIMESTAMP;
             final File ts = new File(this.getContext().getExternalFilesDir(null) + "/" + tsFn);
+            final File ts_bak = new File(this.getContext().getExternalFilesDir(null) + "/" + ShelterUpdater.BAK_SHELTER_TIMESTAMP);
 
-            // 既存ファイルの削除
-            FileUtil.forceDelete(shelter);
-            FileUtil.forceDelete(ts);
+            // バックアップファイルの削除
+            FileUtil.forceDelete(shelter_bak);
+            FileUtil.forceDelete(ts_bak);
 
-            // 避難所ファイルを移動
+            // 既存ファイルをバックアップ
+            FileUtil.psudoMoveFile(shelter, shelter_bak);
+            FileUtil.psudoMoveFile(ts, ts_bak);
+
+            // ダウンロードした避難所ファイルを移動
             final String folder = DownLoader.getDownloadFolder(this.getContext());
 
             FileUtil.psudoMoveFile(new File(folder + "/" + ShelterUpdater.SHELTER_FILE), shelter);

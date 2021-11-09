@@ -8,16 +8,22 @@ import android.os.RemoteException;
 import android.util.Log;
 
 import com.mori_soft.escape.Util.AssetFileUtils;
+import com.mori_soft.escape.Util.FileUtil;
 import com.mori_soft.escape.Util.ShelterCsvReader;
 import com.mori_soft.escape.entity.ShelterEntity;
 import com.mori_soft.escape.provider.ShelterContract;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * 避難所データ更新を行うクラス
+ *
+ * 避難所データは、ひとつ前のファイルをバックアップとして持ち、
+ * 更新失敗時にはロールバックができるようにする
+ * （CSVファイルの記述ミスが想定されるため）
  */
 public class ShelterUpdater {
 
@@ -25,12 +31,36 @@ public class ShelterUpdater {
 
     public final static String SHELTER_FILE = "iseshi_shelters.csv";
     public final static String SHELTER_TIMESTAMP = "shelter_timestamp";
+    public final static String BAK_SHELTER_FILE = "iseshi_shelters.csv.bak";
+    public final static String BAK_SHELTER_TIMESTAMP = "shelter_timestamp.bak";
 
     public static void updateShelter(Context context) {
+        Log.d(TAG, "避難所データの更新開始");
+
         // csv ファイルを読み込み
         final String fn = getOfflineShelterFile(context);
         List<ShelterEntity> list = ShelterCsvReader.parse(context, fn);
 
+        updateShelterDatabase(context, list);
+    }
+
+    /**
+     * 避難所ファイルをロールバックする
+     *
+     * 避難所データ更新時の処理はトランザクションで保護されているので
+     * 更新処理が失敗した場合、ファイルだけを元に戻せばよい
+     * @param context
+     */
+    public static void rollbackShelterFiles(Context context) {
+        Log.d(TAG, "避難所ファイルのロールバック開始");
+
+        // バックアップファイルを戻す
+        if (! rollbackBackupfiles(context)) {
+            throw new RuntimeException("failed to rollback");
+        }
+    }
+
+    private static void updateShelterDatabase(Context context, List<ShelterEntity> list) {
         // 避難所データの更新, 処理は batch で行う
         ContentResolver resolver = context.getContentResolver();
         ArrayList<ContentProviderOperation> batch = new ArrayList<>();
@@ -58,13 +88,14 @@ public class ShelterUpdater {
             batch.add(builder.build());
         }
 
+        // ShelterContentProvider#applyBatch による処理はトランザクションで保護済み
         try {
             resolver.applyBatch(ShelterContract.AUTHORITY, batch);
         } catch (OperationApplicationException e) {
-            Log.w(TAG, "避難所ファイルの更新時にエラーが発生しました", e);
+            Log.w(TAG, "データベースの避難所データ更新時にエラーが発生しました", e);
             throw new RuntimeException(e);
         } catch (RemoteException e) {
-            Log.w(TAG, "避難所ファイルの更新時にエラーが発生しました", e);
+            Log.w(TAG, "データベースの避難所データ更新時にエラーが発生しました", e);
             throw new RuntimeException(e);
         }
     }
@@ -75,6 +106,12 @@ public class ShelterUpdater {
     }
     private static String getOfflineShelterTimestampFile(Context context) {
         return new File(context.getExternalFilesDir(null),  "/" + SHELTER_TIMESTAMP).getAbsolutePath();
+    }
+    private static String getOfflineBackupShelterFile(Context context) {
+        return new File(context.getExternalFilesDir(null),  "/" + BAK_SHELTER_FILE).getAbsolutePath();
+    }
+    private static String getOfflineBackupShelterTimestampFile(Context context) {
+        return new File(context.getExternalFilesDir(null),  "/" + BAK_SHELTER_TIMESTAMP).getAbsolutePath();
     }
 
     /**
@@ -103,4 +140,18 @@ public class ShelterUpdater {
         return AssetFileUtils.copyFromAsset(context, fnInAsset, dst.getAbsolutePath());
     }
 
+    private static boolean rollbackBackupfiles(Context context) {
+        try {
+            FileUtil.copyFile(
+                    new File(getOfflineBackupShelterFile(context)),
+                    new File(getOfflineShelterFile(context)));
+            FileUtil.copyFile(
+                    new File(getOfflineBackupShelterTimestampFile(context)),
+                    new File(getOfflineShelterTimestampFile(context)));
+        } catch (IOException e) {
+            Log.w(TAG, "避難所ファイルのバックアップからのロールバックに失敗しました", e);
+            return false;
+        }
+        return true;
+    }
 }
