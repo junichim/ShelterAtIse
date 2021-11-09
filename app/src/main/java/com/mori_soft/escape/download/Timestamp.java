@@ -7,9 +7,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -22,12 +19,14 @@ import java.util.Date;
  *   １行のみで構成
  *   ISO-8601形式で記入
  */
-class Timestamp {
+public class Timestamp {
 
     private static final String TAG = Timestamp.class.getSimpleName();
 
     private static final String DATE_FMT = "yyyy-MM-dd'T'hh:mm:ssZ";
+    private static final String DATE_FMT_YMD = "yyyy年MM月dd日";
     private static final SimpleDateFormat mSdf = new SimpleDateFormat(DATE_FMT);
+    private static final SimpleDateFormat mSdfYmd = new SimpleDateFormat(DATE_FMT_YMD);
 
     private final Date mTimestampDate;
 
@@ -53,6 +52,10 @@ class Timestamp {
     }
     public String toString() {
         return mSdf.format(mTimestampDate);
+    }
+
+    public String getYmdString() {
+        return mSdfYmd.format(mTimestampDate);
     }
 
     private  Date getDate() {

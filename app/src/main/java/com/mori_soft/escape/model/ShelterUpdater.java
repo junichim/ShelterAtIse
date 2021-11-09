@@ -10,6 +10,7 @@ import android.util.Log;
 import com.mori_soft.escape.Util.AssetFileUtils;
 import com.mori_soft.escape.Util.FileUtil;
 import com.mori_soft.escape.Util.ShelterCsvReader;
+import com.mori_soft.escape.download.Timestamp;
 import com.mori_soft.escape.entity.ShelterEntity;
 import com.mori_soft.escape.provider.ShelterContract;
 
@@ -154,4 +155,10 @@ public class ShelterUpdater {
         }
         return true;
     }
+
+    public static String getCurrentTimeStamp(Context context) {
+        Timestamp ts = new Timestamp(context.getExternalFilesDir(null) + "/" + SHELTER_TIMESTAMP);
+        return ts.getYmdString();
+    }
+
 }

@@ -16,11 +16,11 @@
 package com.mori_soft.escape.map;
 
 import android.content.Context;
-import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
 
 import com.mori_soft.escape.Util.AssetFileUtils;
+import com.mori_soft.escape.download.Timestamp;
 
 import org.mapsforge.core.model.LatLong;
 import org.mapsforge.map.android.graphics.AndroidGraphicFactory;
@@ -116,5 +116,10 @@ public class MapViewSetupper {
         }
 
         return AssetFileUtils.copyFromAsset(context, fnInAsset, dst.getAbsolutePath());
+    }
+
+    public static String getCurrentTimeStamp(Context context) {
+        Timestamp ts = new Timestamp(context.getExternalFilesDir(null) + "/" + MAP_TIMESTAMP);
+        return ts.getYmdString();
     }
 }

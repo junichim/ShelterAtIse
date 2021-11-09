@@ -26,6 +26,8 @@ import android.widget.TextView;
 
 import com.mori_soft.escape.R;
 import com.mori_soft.escape.Util.VersionUtil;
+import com.mori_soft.escape.map.MapViewSetupper;
+import com.mori_soft.escape.model.ShelterUpdater;
 
 /**
  * 『このアプリについて』ダイアログ.
@@ -60,8 +62,17 @@ public class AboutDialogFragment extends DialogFragment {
 
         View v = getActivity().getLayoutInflater().inflate(R.layout.dialog_about, null);
 
+        // オフラインマップおよび避難所データのバージョン
+        String ver_map = MapViewSetupper.getCurrentTimeStamp(this.getContext());
+        String ver_shelter = ShelterUpdater.getCurrentTimeStamp(this.getContext());
+
+        TextView tv = (TextView) v.findViewById(R.id.about_map_version);
+        tv.setText("マップデータ：" + ver_map);
+        tv = (TextView) v.findViewById(R.id.about_shelter_version);
+        tv.setText("避難所データ：" + ver_shelter);
+
         for (int i = 0; i < RES_IDS.length; i++) {
-            TextView tv = (TextView) v.findViewById(RES_IDS[i]);
+            tv = (TextView) v.findViewById(RES_IDS[i]);
             String str = getActivity().getResources().getString(RES_STRINGS[i]);
             tv.setText(Html.fromHtml(str));
             tv.setMovementMethod(LinkMovementMethod.getInstance());
