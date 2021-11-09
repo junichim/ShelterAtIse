@@ -97,7 +97,7 @@ public class ShelterSQLiteOpenHelper extends SQLiteOpenHelper {
 
         StringBuilder sb = new StringBuilder(INIT_DATA_INSERT);
 
-        List<ShelterEntity> list = ShelterCsvReader.parse(mContext, ASSET_FILE_INITIAL_DATA);
+        List<ShelterEntity> list = ShelterCsvReader.parseFromAsset(mContext, ASSET_FILE_INITIAL_DATA);
         for (ShelterEntity ent : list) {
             sb.append("(");
             addElm(sb, ent.address);
