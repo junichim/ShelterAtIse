@@ -45,10 +45,14 @@ import com.mori_soft.escape.Util.LocationUtil;
 import com.mori_soft.escape.Util.PermissionUtil;
 import com.mori_soft.escape.dialog.AboutDialogFragment;
 import com.mori_soft.escape.dialog.LegendDialogFragment;
+import com.mori_soft.escape.dialog.MapUpdateConfirmationDialogFragment;
+import com.mori_soft.escape.dialog.ShelterUpdateConfirmationDialogFragment;
 import com.mori_soft.escape.dialog.UpdateConfirmationDialogFragment;
 import com.mori_soft.escape.dialog.UsageDialogFragment;
 import com.mori_soft.escape.download.OfflineMapCheckerAsyncTaskLoader;
 import com.mori_soft.escape.download.OfflineMapDownLoaderAsyncTaskLoader;
+import com.mori_soft.escape.download.OfflineShelterCheckerAsyncTaskLoader;
+import com.mori_soft.escape.download.OfflineShelterDownLoaderAsyncTaskLoader;
 import com.mori_soft.escape.map.MapViewSetupper;
 import com.mori_soft.escape.model.GraphHopperWrapper;
 import com.mori_soft.escape.model.Ranking;
@@ -57,6 +61,7 @@ import com.mori_soft.escape.map.LayerManager;
 import com.mori_soft.escape.model.NearestShelter;
 import com.mori_soft.escape.model.NearestShelterAsynkTaskLoader;
 import com.mori_soft.escape.model.ShelterType;
+import com.mori_soft.escape.model.ShelterUpdater;
 import com.mori_soft.escape.provider.ShelterContract;
 
 import org.mapsforge.core.model.LatLong;
@@ -70,19 +75,24 @@ import java.util.List;
  * 地図表示Fragment.
  */
 
-public class MapFragment extends Fragment implements UpdateConfirmationDialogFragment.onUpdateListener {
+public class MapFragment extends Fragment implements
+        MapUpdateConfirmationDialogFragment.onUpdateListener,
+        ShelterUpdateConfirmationDialogFragment.onUpdateListener {
 
     private static final String TAG = MapFragment.class.getSimpleName();
 
     private static final String FRAGMENT_TAG_DIALOG_LEGEND = "LEGEND";
     private static final String FRAGMENT_TAG_DIALOG_USAGE = "USAGE";
     private static final String FRAGMENT_TAG_DIALOG_ABOUT = "ABOUT";
-    private static final String FRAGMENT_TAG_DIALOG_UPDATE = "UPDATE";
+    private static final String FRAGMENT_TAG_DIALOG_UPDATE_MAP = "UPDATE_MAP";
+    private static final String FRAGMENT_TAG_DIALOG_UPDATE_SHELTER = "UPDATE_SHELTER";
 
     private static final int SHELTER_LOADER_ID = 1;
     private static final int NEAREST_LOADER_ID = 2;
-    private static final int CHECK_UPDATE_LOADER_ID = 3;
-    private static final int UPDATE_LOADER_ID = 4;
+    private static final int CHECK_UPDATE_MAP_LOADER_ID = 3;
+    private static final int UPDATE_MAP_LOADER_ID = 4;
+    private static final int CHECK_UPDATE_SHELTER_LOADER_ID = 5;
+    private static final int UPDATE_SHELTER_LOADER_ID = 6;
 
     private static final int DELAY_CHECK_UPDATE = 10 * 1000; // オフラインマップ更新チェックまでの時間 (ms)
 
@@ -251,6 +261,13 @@ public class MapFragment extends Fragment implements UpdateConfirmationDialogFra
         if (!res) {
             Log.w(TAG, "GraphHopper ファイルの準備に失敗しました");
         }
+
+        // 避難所ファイル
+        res = ShelterUpdater.prepareOfflineShelterFile(this.getActivity());
+        if (!res) {
+            Log.w(TAG, "避難所 ファイルの準備に失敗しました");
+        }
+
     }
 
     private void onGrantedMapDraw() {
@@ -455,7 +472,7 @@ public class MapFragment extends Fragment implements UpdateConfirmationDialogFra
         // WiFi 接続時の判定
         if (ConnectionUtil.isWiFiConnected(getContext())) {
             Log.d(TAG, "WiFi connected. start check offline map update");
-            this.getLoaderManager().initLoader(CHECK_UPDATE_LOADER_ID, null, new OfflineMapCheckerLoaderCallbacks());
+            this.getLoaderManager().initLoader(CHECK_UPDATE_MAP_LOADER_ID, null, new OfflineMapCheckerLoaderCallbacks());
         } else {
             Log.d(TAG, "WiFi disconnected. skip offline map update");
         }
@@ -477,32 +494,39 @@ public class MapFragment extends Fragment implements UpdateConfirmationDialogFra
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        confirmUserUpdateOrNot();
+                        confirmUserMapUpdateOrNot();
+                    }
+                });
+            } else {
+                Log.d(TAG, "引き続き、避難所ファイルの更新をチェックします");
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        checkShelter();
                     }
                 });
             }
-            MapFragment.this.getLoaderManager().destroyLoader(CHECK_UPDATE_LOADER_ID);
+            MapFragment.this.getLoaderManager().destroyLoader(CHECK_UPDATE_MAP_LOADER_ID);
         }
         @Override
         public void onLoaderReset(Loader<Boolean> loader) {
         }
     }
 
-    private void confirmUserUpdateOrNot() {
+    private void confirmUserMapUpdateOrNot() {
 
         if (! this.getActivity().isFinishing() && ! this.getActivity().isDestroyed()) {
-            DialogFragment f = UpdateConfirmationDialogFragment.getInstance(MapFragment.this);
-            showDialog(f, FRAGMENT_TAG_DIALOG_UPDATE);
+            DialogFragment f = MapUpdateConfirmationDialogFragment.getInstance(MapFragment.this);
+            showDialog(f, FRAGMENT_TAG_DIALOG_UPDATE_MAP);
         } else {
             Log.w(TAG, "activity is on finishing or destroyed. so update confirmation dialog skipped.");
         };
 
     }
 
-    // UpdateConfirmationDialogFragment のListener
-
+    // MapUpdateConfirmationDialogFragment のListener
     @Override
-    public void onOkClickListener() {
+    public void onOkClickMap() {
         updateOfflineMap();
     }
 
@@ -512,7 +536,7 @@ public class MapFragment extends Fragment implements UpdateConfirmationDialogFra
     private void updateOfflineMap() {
         Log.d(TAG, "updateOfflineMap");
         // オフラインマップ更新
-        this.getLoaderManager().initLoader(UPDATE_LOADER_ID, null, new OfflineMapDownLoaderLoaderCallbacks());
+        this.getLoaderManager().initLoader(UPDATE_MAP_LOADER_ID, null, new OfflineMapDownLoaderLoaderCallbacks());
     }
 
     private class OfflineMapDownLoaderLoaderCallbacks implements LoaderManager.LoaderCallbacks<Boolean> {
@@ -536,7 +560,114 @@ public class MapFragment extends Fragment implements UpdateConfirmationDialogFra
             } else {
                 Toast.makeText(MapFragment.this.getContext(), "更新失敗", Toast.LENGTH_LONG).show();
             }
-            MapFragment.this.getLoaderManager().destroyLoader(UPDATE_LOADER_ID);
+            MapFragment.this.getLoaderManager().destroyLoader(UPDATE_MAP_LOADER_ID);
+        }
+        @Override
+        public void onLoaderReset(Loader<Boolean> loader) {
+        }
+    }
+
+    // 避難所ファイル更新チェック
+    private void checkShelter() {
+        Log.d(TAG, "checkShelter");
+
+        // WiFi 接続時の判定
+        if (ConnectionUtil.isWiFiConnected(getContext())) {
+            Log.d(TAG, "WiFi connected. start check shelter update");
+            this.getLoaderManager().initLoader(CHECK_UPDATE_SHELTER_LOADER_ID, null, new OfflineShelterCheckerLoaderCallbacks());
+        } else {
+            Log.d(TAG, "WiFi disconnected. skip shelter update");
+        }
+    }
+
+    private class OfflineShelterCheckerLoaderCallbacks implements LoaderManager.LoaderCallbacks<Boolean> {
+        private final String TAG = OfflineShelterCheckerLoaderCallbacks.class.getSimpleName();
+        @Override
+        public Loader<Boolean> onCreateLoader(int i, Bundle bundle) {
+            Log.d(TAG, "onCreateLoader");
+            return new OfflineShelterCheckerAsyncTaskLoader(MapFragment.this.getActivity());
+        }
+        @Override
+        public void onLoadFinished(Loader<Boolean> loader, Boolean aBoolean) {
+            Log.d(TAG, "避難所ファイルcheck: " + aBoolean);
+            if (aBoolean) {
+                // onLoadFinished からは直接 DialogFragment 表示ができない
+                // いったん、handler 経由にして、呼び出し側でActivityの状態をチェックする
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        confirmUserShelterUpdateOrNot();
+                    }
+                });
+            }
+            MapFragment.this.getLoaderManager().destroyLoader(CHECK_UPDATE_SHELTER_LOADER_ID);
+        }
+        @Override
+        public void onLoaderReset(Loader<Boolean> loader) {
+        }
+    }
+
+    private void confirmUserShelterUpdateOrNot() {
+
+        if (! this.getActivity().isFinishing() && ! this.getActivity().isDestroyed()) {
+            DialogFragment f = ShelterUpdateConfirmationDialogFragment.getInstance(MapFragment.this);
+            showDialog(f, FRAGMENT_TAG_DIALOG_UPDATE_SHELTER);
+        } else {
+            Log.w(TAG, "activity is on finishing or destroyed. so update confirmation dialog skipped.");
+        };
+
+    }
+
+    // ShelterUpdateConfirmationDialogFragment のListener
+    @Override
+    public void onOkClickShelter() {
+        updateShelterFile();
+    }
+
+    /**
+     * 避難所ファイル更新
+     */
+    private void updateShelterFile() {
+        Log.d(TAG, "updateShelterFile");
+        // 避難所ファイル更新
+        this.getLoaderManager().initLoader(UPDATE_SHELTER_LOADER_ID, null, new OfflineShelterDownLoaderLoaderCallbacks());
+    }
+
+    private class OfflineShelterDownLoaderLoaderCallbacks implements LoaderManager.LoaderCallbacks<Boolean> {
+        private final String TAG = OfflineShelterDownLoaderLoaderCallbacks.class.getSimpleName();
+        @Override
+        public Loader<Boolean> onCreateLoader(int i, Bundle bundle) {
+            Log.d(TAG, "onCreateLoader");
+            return new OfflineShelterDownLoaderAsyncTaskLoader(MapFragment.this.getActivity());
+        }
+        @Override
+        public void onLoadFinished(Loader<Boolean> loader, Boolean aBoolean) {
+            if (aBoolean) {
+                // 避難所データの更新
+                try {
+                    ShelterUpdater.updateShelter(MapFragment.this.getContext());
+                } catch (Exception e) {
+                    Log.w(TAG, "避難所データ更新でエラーが発生しました。更新処理を中断します。", e);
+                    Toast.makeText(MapFragment.this.getContext(), "避難所ファイル更新時にエラーが発生しました。更新処理を中断します。", Toast.LENGTH_LONG).show();
+
+                    // TODO 巻き戻しするか？
+
+                    MapFragment.this.getLoaderManager().destroyLoader(UPDATE_SHELTER_LOADER_ID);
+                    return;
+                }
+
+                Toast.makeText(MapFragment.this.getContext(), "避難所ファイル更新に成功しました。再起動します。", Toast.LENGTH_LONG).show();
+                // アプリを再起動
+                if (MapFragment.this.getActivity() instanceof MainActivity) {
+
+                    destroyAllLoaders();
+                    ((MainActivity)MapFragment.this.getActivity()).restart();
+                }
+
+            } else {
+                Toast.makeText(MapFragment.this.getContext(), "更新失敗", Toast.LENGTH_LONG).show();
+            }
+            MapFragment.this.getLoaderManager().destroyLoader(UPDATE_SHELTER_LOADER_ID);
         }
         @Override
         public void onLoaderReset(Loader<Boolean> loader) {
@@ -546,7 +677,9 @@ public class MapFragment extends Fragment implements UpdateConfirmationDialogFra
     private void destroyAllLoaders() {
         MapFragment.this.getLoaderManager().destroyLoader(SHELTER_LOADER_ID);
         MapFragment.this.getLoaderManager().destroyLoader(NEAREST_LOADER_ID);
-        MapFragment.this.getLoaderManager().destroyLoader(CHECK_UPDATE_LOADER_ID);
-        MapFragment.this.getLoaderManager().destroyLoader(UPDATE_LOADER_ID);
+        MapFragment.this.getLoaderManager().destroyLoader(CHECK_UPDATE_MAP_LOADER_ID);
+        MapFragment.this.getLoaderManager().destroyLoader(UPDATE_MAP_LOADER_ID);
+        MapFragment.this.getLoaderManager().destroyLoader(CHECK_UPDATE_SHELTER_LOADER_ID);
+        MapFragment.this.getLoaderManager().destroyLoader(UPDATE_SHELTER_LOADER_ID);
     }
 }
