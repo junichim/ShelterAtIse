@@ -289,7 +289,7 @@ public class MapFragment extends Fragment implements
         if (mLayerManager.isSetShelters()) {
             updateShelter();
         } else {
-            this.getLoaderManager().initLoader(SHELTER_LOADER_ID, null, new ShelterLoaderCallbacks());
+            LoaderManager.getInstance(this).initLoader(SHELTER_LOADER_ID, null, new ShelterLoaderCallbacks());
         }
     }
 
@@ -333,7 +333,7 @@ public class MapFragment extends Fragment implements
           if (mLayerManager.getShelterManager() != null) {
             wasSearched = true;
             setNearestLoaderCallbacks();
-            getLoaderManager().restartLoader(NEAREST_LOADER_ID, null, mNearestLoaderCallbacks);
+              LoaderManager.getInstance(this).restartLoader(NEAREST_LOADER_ID, null, mNearestLoaderCallbacks);
         }
     }
 
@@ -429,7 +429,7 @@ public class MapFragment extends Fragment implements
             }, DELAY_CHECK_UPDATE);
 
             // Loader の破棄
-            MapFragment.this.getLoaderManager().destroyLoader(SHELTER_LOADER_ID);
+            LoaderManager.getInstance(MapFragment.this).destroyLoader(SHELTER_LOADER_ID);
         }
         @Override
         public void onLoaderReset(Loader<Cursor> loader) {
@@ -478,7 +478,7 @@ public class MapFragment extends Fragment implements
         // WiFi 接続時の判定
         if (ConnectionUtil.isWiFiConnected(getContext())) {
             Log.d(TAG, "WiFi connected. start check offline map update");
-            this.getLoaderManager().initLoader(CHECK_UPDATE_MAP_LOADER_ID, null, new OfflineMapCheckerLoaderCallbacks());
+            LoaderManager.getInstance(this).initLoader(CHECK_UPDATE_MAP_LOADER_ID, null, new OfflineMapCheckerLoaderCallbacks());
         } else {
             Log.d(TAG, "WiFi disconnected. skip offline map update");
         }
@@ -512,7 +512,7 @@ public class MapFragment extends Fragment implements
                     }
                 });
             }
-            MapFragment.this.getLoaderManager().destroyLoader(CHECK_UPDATE_MAP_LOADER_ID);
+            LoaderManager.getInstance(MapFragment.this).destroyLoader(CHECK_UPDATE_MAP_LOADER_ID);
         }
         @Override
         public void onLoaderReset(Loader<Boolean> loader) {
@@ -572,7 +572,7 @@ public class MapFragment extends Fragment implements
             } else {
                 Toast.makeText(MapFragment.this.getContext(), "更新失敗", Toast.LENGTH_LONG).show();
             }
-            MapFragment.this.getLoaderManager().destroyLoader(UPDATE_MAP_LOADER_ID);
+            LoaderManager.getInstance(MapFragment.this).destroyLoader(UPDATE_MAP_LOADER_ID);
         }
         @Override
         public void onLoaderReset(Loader<Boolean> loader) {
@@ -586,7 +586,7 @@ public class MapFragment extends Fragment implements
         // WiFi 接続時の判定
         if (ConnectionUtil.isWiFiConnected(getContext())) {
             Log.d(TAG, "WiFi connected. start check shelter update");
-            this.getLoaderManager().initLoader(CHECK_UPDATE_SHELTER_LOADER_ID, null, new OfflineShelterCheckerLoaderCallbacks());
+            LoaderManager.getInstance(this).initLoader(CHECK_UPDATE_SHELTER_LOADER_ID, null, new OfflineShelterCheckerLoaderCallbacks());
         } else {
             Log.d(TAG, "WiFi disconnected. skip shelter update");
         }
@@ -612,7 +612,7 @@ public class MapFragment extends Fragment implements
                     }
                 });
             }
-            MapFragment.this.getLoaderManager().destroyLoader(CHECK_UPDATE_SHELTER_LOADER_ID);
+            LoaderManager.getInstance(MapFragment.this).destroyLoader(CHECK_UPDATE_SHELTER_LOADER_ID);
         }
         @Override
         public void onLoaderReset(Loader<Boolean> loader) {
@@ -642,7 +642,7 @@ public class MapFragment extends Fragment implements
     private void updateShelterFile() {
         Log.d(TAG, "updateShelterFile");
         // 避難所ファイル更新
-        this.getLoaderManager().initLoader(UPDATE_SHELTER_LOADER_ID, null, new OfflineShelterDownLoaderLoaderCallbacks());
+        LoaderManager.getInstance(this).initLoader(UPDATE_SHELTER_LOADER_ID, null, new OfflineShelterDownLoaderLoaderCallbacks());
     }
 
     private class OfflineShelterDownLoaderLoaderCallbacks implements LoaderManager.LoaderCallbacks<Boolean> {
@@ -669,7 +669,7 @@ public class MapFragment extends Fragment implements
                         Toast.makeText(MapFragment.this.getContext(), "避難所データの復元に失敗しました。データをクリアして再起動してください。", Toast.LENGTH_LONG).show();
                     }
 
-                    MapFragment.this.getLoaderManager().destroyLoader(UPDATE_SHELTER_LOADER_ID);
+                    LoaderManager.getInstance(MapFragment.this).destroyLoader(UPDATE_SHELTER_LOADER_ID);
                     return;
                 }
 
@@ -684,7 +684,7 @@ public class MapFragment extends Fragment implements
             } else {
                 Toast.makeText(MapFragment.this.getContext(), "更新失敗", Toast.LENGTH_LONG).show();
             }
-            MapFragment.this.getLoaderManager().destroyLoader(UPDATE_SHELTER_LOADER_ID);
+            LoaderManager.getInstance(MapFragment.this).destroyLoader(UPDATE_SHELTER_LOADER_ID);
         }
         @Override
         public void onLoaderReset(Loader<Boolean> loader) {
@@ -692,11 +692,11 @@ public class MapFragment extends Fragment implements
     }
 
     private void destroyAllLoaders() {
-        MapFragment.this.getLoaderManager().destroyLoader(SHELTER_LOADER_ID);
-        MapFragment.this.getLoaderManager().destroyLoader(NEAREST_LOADER_ID);
-        MapFragment.this.getLoaderManager().destroyLoader(CHECK_UPDATE_MAP_LOADER_ID);
-        MapFragment.this.getLoaderManager().destroyLoader(UPDATE_MAP_LOADER_ID);
-        MapFragment.this.getLoaderManager().destroyLoader(CHECK_UPDATE_SHELTER_LOADER_ID);
-        MapFragment.this.getLoaderManager().destroyLoader(UPDATE_SHELTER_LOADER_ID);
+        LoaderManager.getInstance(this).destroyLoader(SHELTER_LOADER_ID);
+        LoaderManager.getInstance(this).destroyLoader(NEAREST_LOADER_ID);
+        LoaderManager.getInstance(this).destroyLoader(CHECK_UPDATE_MAP_LOADER_ID);
+        LoaderManager.getInstance(this).destroyLoader(UPDATE_MAP_LOADER_ID);
+        LoaderManager.getInstance(this).destroyLoader(CHECK_UPDATE_SHELTER_LOADER_ID);
+        LoaderManager.getInstance(this).destroyLoader(UPDATE_SHELTER_LOADER_ID);
     }
 }

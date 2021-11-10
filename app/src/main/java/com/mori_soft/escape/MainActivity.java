@@ -234,7 +234,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private LocationRequest getLocationRequest() {
-        LocationRequest req = new LocationRequest();
+        LocationRequest req = LocationRequest.create();
         req.setInterval(LOCATION_INTERVAL);
         req.setFastestInterval(FASTEST_LOCATION_INTERVAL);
         req.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
