@@ -10,6 +10,7 @@
     <string name="legend">凡例</string>
     <string name="usage">使い方</string>
     <string name="check_update">更新を確認</string>
+    <string name="goto_supportsite">サポートサイトへ</string>
     <string name="about">このアプリについて</string>
 
     <string name="legend_current">現在位置</string>

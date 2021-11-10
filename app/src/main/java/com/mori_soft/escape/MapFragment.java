@@ -16,7 +16,9 @@
 package com.mori_soft.escape;
 
 import android.Manifest;
+import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import androidx.annotation.Nullable;
@@ -95,6 +97,8 @@ public class MapFragment extends Fragment implements
     private static final int UPDATE_SHELTER_LOADER_ID = 6;
 
     private static final int DELAY_CHECK_UPDATE = 10 * 1000; // オフラインマップ更新チェックまでの時間 (ms)
+
+    private static final String SUPPORT_SITE_URL = "https://www.mori-soft.com/escape/";
 
     private MapView mMapView;
     private LayerManager mLayerManager;
@@ -239,6 +243,11 @@ public class MapFragment extends Fragment implements
                 } else {
                     Toast.makeText(this.getActivity(), "データの更新は WiFi 接続時のみ可能です。", Toast.LENGTH_SHORT).show();
                 }
+                return true;
+            case R.id.action_goto_supportsite:
+                Uri uri = Uri.parse(SUPPORT_SITE_URL);
+                Intent i = new Intent(Intent.ACTION_VIEW, uri);
+                startActivity(i);
                 return true;
             case R.id.action_about:
                 dialog = new AboutDialogFragment();
