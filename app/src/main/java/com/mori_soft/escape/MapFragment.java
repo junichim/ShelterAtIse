@@ -343,24 +343,20 @@ public class MapFragment extends Fragment implements
     }
 
 
+    /**
+     * 避難所データ読み込み Loader
+     *
+     * Loader としてはすべてのデータをデータベースから読み込み、
+     * 避難所として登録する。
+     * 表示側（避難所種別の選択）で、表示する避難所のアイコンを
+     * 切り替える
+     */
     private class ShelterLoaderCallbacks implements LoaderManager.LoaderCallbacks<Cursor> {
         private final String TAG = ShelterLoaderCallbacks.class.getSimpleName();
         @Override
         public Loader<Cursor> onCreateLoader(int id, Bundle args) {
             Log.d(TAG, "onCreateLoader");
 
-            String where_clause;
-            switch (mSearchTargetShelterType) {
-                case TSUNAMI:
-                    where_clause = ShelterContract.Shelter.IS_TSUNAMI + " = 1 ";
-                    break;
-                case DESIGNATION:
-                    where_clause = ShelterContract.Shelter.IS_SHELTER + " = 1 ";
-                    break;
-                default:
-                    where_clause = null;
-                    break;
-            }
             return new CursorLoader(MapFragment.this.getActivity(), ShelterContract.Shelter.CONTENT_URI,
                     new String[]{
                             ShelterContract._ID,
@@ -376,9 +372,9 @@ public class MapFragment extends Fragment implements
                             ShelterContract.Shelter.LAT,
                             ShelterContract.Shelter.LON,
                     },
-                    where_clause, // where clause
-                    null,        // where arguments
-                    null         // order by
+                    null, // where clause
+                    null, // where arguments
+                    null  // order by
                     );
         }
         @Override
@@ -412,6 +408,7 @@ public class MapFragment extends Fragment implements
             } while (data.moveToNext());
 
             mLayerManager.setShelters(shelters);
+            // 避難所の種類に応じて表示を更新
             updateShelter();
 
             // 一定時間後、最新のオフラインマップがあるか確認処理を呼び出す
