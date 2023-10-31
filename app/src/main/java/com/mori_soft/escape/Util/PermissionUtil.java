@@ -34,7 +34,6 @@ public class PermissionUtil {
 
     private static final String TAG = PermissionUtil.class.getSimpleName();
 
-    private static final String DIALOG_EXPLAIN_STORAGE = "dialog_explain_storage";
     private static final String DIALOG_EXPLAIN_LOCATION = "dialog_explain_location";
 
     public static boolean checkPermissionGranted(Context context, String permission) {
@@ -60,15 +59,7 @@ public class PermissionUtil {
             };
 
             // パーミッションが必要な理由を説明するダイアログを表示
-            if (requestCode == MainActivity.PERMISSION_REQUEST_CODE_WRITE_STORAGE) {
-                InfoDialogFragment df = InfoDialogFragment.getInstance(
-                        R.string.dialog_info_need_storage_permission_title,
-                        R.string.dialog_info_need_storage_permission_abstract,
-                        R.string.dialog_info_need_storage_permission_detail);
-                df.setClickListener(callback);
-                df.show(activity.getSupportFragmentManager(), DIALOG_EXPLAIN_STORAGE);
-
-            } else if (requestCode == MainActivity.PERMISSION_REQUEST_CODE_LOCATION) {
+            if (requestCode == MainActivity.PERMISSION_REQUEST_CODE_LOCATION) {
                 InfoDialogFragment df = InfoDialogFragment.getInstance(
                         R.string.dialog_info_need_location_permission_title,
                         R.string.dialog_info_need_location_permission_abstract,

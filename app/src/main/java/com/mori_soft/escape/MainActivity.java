@@ -26,6 +26,8 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.os.Build;
 import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
@@ -57,7 +59,6 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    public static final int PERMISSION_REQUEST_CODE_WRITE_STORAGE = 1;
     public static final int PERMISSION_REQUEST_CODE_LOCATION = 2;
 
     private static final int GOOGLEPLAYSERVICE_ERROR_DIALOG_CODE = 1;
@@ -92,11 +93,7 @@ public class MainActivity extends AppCompatActivity {
         super.onStart();
 
         // パーミッションチェック
-        if (! PermissionUtil.checkPermissionGranted(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-            PermissionUtil.requestPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_REQUEST_CODE_WRITE_STORAGE);
-        } else {
-            checkGooglePlayService();
-        }
+        checkGooglePlayService();
     }
 
     @Override
@@ -143,13 +140,6 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
         switch (requestCode) {
-            case PERMISSION_REQUEST_CODE_WRITE_STORAGE:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    checkGooglePlayService();
-                } else {
-                    Log.w(TAG, "ストレージの権限がありません");
-                }
-                break;
             case PERMISSION_REQUEST_CODE_LOCATION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     checkCurrentLocationSettings();

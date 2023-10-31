@@ -161,16 +161,13 @@ public class MapFragment extends Fragment implements
                         mSearchTargetShelterType = ShelterType.INVALID;
                 }
 
-                // 地図データにアクセスできる時だけ画面表示を更新
-                if (PermissionUtil.checkPermissionGranted(MapFragment.this.getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-                    // 画面表示を更新
-                    mLayerManager.updateShelterMarker(mSearchTargetShelterType);
-                    // 現在位置を取得したら更新
-                    if (mLayerManager.getCurrentLocation() != null) {
-                        updateLocationAndSetCenter(mLayerManager.getCurrentLocation());
-                        mProgressBar.setVisibility(View.VISIBLE);
-                        wasSearched = false;
-                    }
+                // 画面表示を更新
+                mLayerManager.updateShelterMarker(mSearchTargetShelterType);
+                // 現在位置を取得したら更新
+                if (mLayerManager.getCurrentLocation() != null) {
+                    updateLocationAndSetCenter(mLayerManager.getCurrentLocation());
+                    mProgressBar.setVisibility(View.VISIBLE);
+                    wasSearched = false;
                 }
             }
 
@@ -188,11 +185,9 @@ public class MapFragment extends Fragment implements
 
         mHandler = new Handler();
 
-        // 地図データにアクセスできる時だけ表示
-        if (PermissionUtil.checkPermissionGranted(this.getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-            prepareMapFiles();
-            onGrantedMapDraw();
-        }
+        // 地図データ表示処理
+        prepareMapFiles();
+        onGrantedMapDraw();
     }
 
     @Override
