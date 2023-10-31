@@ -27,6 +27,13 @@
             android:textSize="18sp" />
 
         <TextView
+            android:text="@string/about_privacy_policy"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:id="@+id/about_privacy_policy" />
+
+        <TextView
             android:text="@string/about_license_me"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

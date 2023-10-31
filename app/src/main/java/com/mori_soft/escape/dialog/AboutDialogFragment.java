@@ -35,6 +35,7 @@ import com.mori_soft.escape.model.ShelterUpdater;
 
 public class AboutDialogFragment extends DialogFragment {
     private static final int[] RES_IDS = {
+            R.id.about_privacy_policy,
             R.id.about_license_me,
             R.id.about_project,
             R.id.about_license_mapsforge,
@@ -45,6 +46,7 @@ public class AboutDialogFragment extends DialogFragment {
             R.id.about_license_fukidashi
     };
     private static final int[] RES_STRINGS = {
+            R.string.about_privacy_policy,
             R.string.about_license_me,
             R.string.about_project,
             R.string.about_license_mapsforge,
