@@ -556,8 +556,8 @@ public class MapFragment extends Fragment implements
         @Override
         public void onLoadFinished(Loader<Boolean> loader, Boolean aBoolean) {
             if (aBoolean) {
-                Toast.makeText(MapFragment.this.getContext(), "オフラインマップ更新に成功しました。再起動します。", Toast.LENGTH_LONG).show();
-                // アプリを再起動
+                Toast.makeText(MapFragment.this.getContext(), "オフラインマップ更新に成功しました。再起動してください。", Toast.LENGTH_LONG).show();
+                // アプリを終了
                 if (MapFragment.this.getActivity() instanceof MainActivity) {
 
                     destroyAllLoaders();
@@ -668,8 +668,8 @@ public class MapFragment extends Fragment implements
                     return;
                 }
 
-                Toast.makeText(MapFragment.this.getContext(), "避難所ファイル更新に成功しました。再起動します。", Toast.LENGTH_LONG).show();
-                // アプリを再起動
+                Toast.makeText(MapFragment.this.getContext(), "避難所ファイル更新に成功しました。再起動してください。", Toast.LENGTH_LONG).show();
+                // アプリを終了
                 if (MapFragment.this.getActivity() instanceof MainActivity) {
 
                     destroyAllLoaders();

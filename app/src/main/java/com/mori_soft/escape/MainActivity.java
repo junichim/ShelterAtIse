@@ -269,12 +269,9 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    // TODO API 29 以降は再起動が難しいので、とりあえず終了させる
     public void restart() {
-        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
-        PendingIntent pending = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_CANCEL_CURRENT);
-
-        AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        am.set(AlarmManager.RTC, System.currentTimeMillis() + RESTART_DELAY, pending);
+        Log.d(TAG, "restart");
 
         // 再起動時は GraphHopper をいったん開放しておく
         GraphHopperWrapper.releaseGraphHopper();
