@@ -264,8 +264,16 @@ public class MainActivity extends AppCompatActivity {
         public void onLocationResult(LocationResult locationResult) {
             super.onLocationResult(locationResult);
 
-            MapFragment f = (MapFragment) MainActivity.this.getSupportFragmentManager().findFragmentById(R.id.fragment_map);
-            f.updateCurrentLocation(new LatLong(locationResult.getLastLocation().getLatitude(), locationResult.getLastLocation().getLongitude()));
+            if (locationResult.getLastLocation() != null) {
+                MapFragment f = (MapFragment) MainActivity.this.getSupportFragmentManager().findFragmentById(R.id.fragment_map);
+                if (f != null) {
+                    f.updateCurrentLocation(new LatLong(locationResult.getLastLocation().getLatitude(), locationResult.getLastLocation().getLongitude()));
+                } else {
+                    Log.w(TAG, "no MapFragment");
+                }
+            } else {
+                Log.w(TAG, "locationResult has no last location");
+            }
         }
     };
 
