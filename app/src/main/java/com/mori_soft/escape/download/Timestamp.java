@@ -25,6 +25,7 @@ public class Timestamp {
 
     private static final String DATE_FMT = "yyyy-MM-dd'T'hh:mm:ssZ";
     private static final String DATE_FMT_YMD = "yyyy年MM月dd日";
+    private static final String DATE_UNKNOWN = "(不明)";
     private static final SimpleDateFormat mSdf = new SimpleDateFormat(DATE_FMT);
     private static final SimpleDateFormat mSdfYmd = new SimpleDateFormat(DATE_FMT_YMD);
 
@@ -55,6 +56,9 @@ public class Timestamp {
     }
 
     public String getYmdString() {
+        if (mTimestampDate == null) {
+            return DATE_UNKNOWN;
+        }
         return mSdfYmd.format(mTimestampDate);
     }
 
