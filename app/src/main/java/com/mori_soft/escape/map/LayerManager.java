@@ -302,6 +302,10 @@ public class LayerManager {
         @Override
         public boolean onLongPress(LatLong tapLatLong, Point layerXY, Point tapXY, int id) {
             Log.d(TAG, "onLongPress: " + id);
+            if (mShelterPaths == null || mShelterPaths.size() == 0) {
+                Log.d(TAG, "mShelterPaths has no data");
+                return false;
+            }
             for (NearestShelter.ShelterPath path : mShelterPaths) {
                 if (path.shelter.recordId == id) {
                     updatePathToShelter(path);
