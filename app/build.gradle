@@ -7,7 +7,7 @@ android {
         applicationId "com.mori_soft.escape"
         minSdkVersion 21
         targetSdkVersion 33
-        versionCode 7
+        versionCode 9
         versionName "1.2"
     }
     buildTypes {
