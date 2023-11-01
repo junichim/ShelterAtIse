@@ -44,6 +44,7 @@ public class OfflineMapDownLoaderAsyncTaskLoader extends AsyncTaskLoader<Boolean
         }
 
         // オフラインマップの更新
+        Log.d(TAG, "オフラインマップ更新開始");
         try {
             final File map = new File(this.getContext().getExternalFilesDir(null) + "/" + MapViewSetupper.MAP_FILE);
             final File ghz = new File(this.getContext().getExternalFilesDir(null) + "/" + GraphHopperWrapper.GHZ_FILE);
@@ -56,18 +57,24 @@ public class OfflineMapDownLoaderAsyncTaskLoader extends AsyncTaskLoader<Boolean
             FileUtil.forceDelete(ts);
             FileUtil.forceDelete(new File(this.getContext().getExternalFilesDir(null) + "/" + GraphHopperWrapper.GHZ_FILE_BASE));
 
+            Log.d(TAG, "既存ファイル削除完了");
+
             // オフラインマップファイルを移動
             final String folder = DownLoader.getDownloadFolder(this.getContext());
 
             FileUtil.psudoMoveFile(new File(folder + "/" + MapViewSetupper.MAP_FILE), map);
             FileUtil.psudoMoveFile(new File(folder + "/" + GraphHopperWrapper.GHZ_FILE), ghz);
             FileUtil.psudoMoveFile(new File(folder + "/" + tsFn), ts);
+
+            Log.d(TAG, "新ファイル移動完了");
         } catch (IOException e) {
             Log.w(TAG, "オフラインマップの更新に失敗しました。更新処理を中止します。", e);
             return false;
         } finally {
             deleteDownloadedFiles();
+            Log.d(TAG, "ダウンロードファイル削除完了");
         }
+        Log.d(TAG, "オフラインマップ更新完了");
         return true;
     }
 
