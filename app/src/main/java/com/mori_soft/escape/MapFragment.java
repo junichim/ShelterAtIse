@@ -109,6 +109,7 @@ public class MapFragment extends Fragment implements
     private NearestShelterLoaderCallbacks mNearestLoaderCallbacks;
     private ProgressBar mProgressBar;
     private Handler mHandler;
+    private boolean mIsVerbose; // 更新確認時のメッセージ表示の有無, false: 非表示  true: 表示
 
     @Nullable
     @Override
@@ -234,7 +235,7 @@ public class MapFragment extends Fragment implements
             case R.id.action_check_update:
                 if (ConnectionUtil.isWiFiConnected(getContext())) {
                     Toast.makeText(this.getActivity(), "オフラインマップデータの更新があるか確認します。", Toast.LENGTH_SHORT).show();
-                    checkOfflineMap();
+                    checkOfflineMap(true);
                 } else {
                     Toast.makeText(this.getActivity(), "データの更新は WiFi 接続時のみ可能です。", Toast.LENGTH_SHORT).show();
                 }
@@ -419,7 +420,7 @@ public class MapFragment extends Fragment implements
             mHandler.postDelayed(new Runnable(){
                 @Override
                 public void run() {
-                    checkOfflineMap();
+                    checkOfflineMap(false);
                 }
             }, DELAY_CHECK_UPDATE);
 
@@ -467,8 +468,9 @@ public class MapFragment extends Fragment implements
     }
 
     // オフラインマップ更新チェック
-    private void checkOfflineMap() {
+    private void checkOfflineMap(boolean verbose) {
         Log.d(TAG, "checkOfflineMap");
+        mIsVerbose = verbose;
 
         // WiFi 接続時の判定
         if (ConnectionUtil.isWiFiConnected(getContext())) {
@@ -500,6 +502,9 @@ public class MapFragment extends Fragment implements
                 });
             } else {
                 Log.d(TAG, "引き続き、避難所ファイルの更新をチェックします");
+                if (mIsVerbose) {
+                    Toast.makeText(MapFragment.this.getContext(), "避難所ファイルの更新をチェックします", Toast.LENGTH_LONG).show();
+                }
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
@@ -606,6 +611,10 @@ public class MapFragment extends Fragment implements
                         confirmUserShelterUpdateOrNot();
                     }
                 });
+            } else {
+                if (mIsVerbose) {
+                    Toast.makeText(MapFragment.this.getContext(), "更新ファイルがありません", Toast.LENGTH_LONG).show();
+                }
             }
             LoaderManager.getInstance(MapFragment.this).destroyLoader(CHECK_UPDATE_SHELTER_LOADER_ID);
         }
