@@ -16,6 +16,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    namespace 'com.mori_soft.escape'
 
     applicationVariants.all { variant ->
         // リリースビルド時
