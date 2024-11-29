@@ -44,6 +44,8 @@ public class ShelterCsvReader {
 
     private static final String TAG = ShelterCsvReader.class.getSimpleName();
 
+    private static final int NUM_OF_SHITEI_KINKYUU_HINANSYO_DETAIL = 5;
+
     public static List<ShelterEntity> parseFromAsset(Context context, String filename) {
 
         AssetManager am = context.getAssets();
@@ -88,7 +90,7 @@ public class ShelterCsvReader {
                 ent.isTsunami   = Boolean.valueOf(splt[i++]);
                 ent.ranking     = Ranking.convertRanking(splt[i++]);
                 ent.isLiving    = Boolean.valueOf(splt[i++]);
-                i += 4;
+                i += NUM_OF_SHITEI_KINKYUU_HINANSYO_DETAIL;
                 ent.memo        = splt[i++];
 
                 // 緯度経度が指定されないケースへ対応
